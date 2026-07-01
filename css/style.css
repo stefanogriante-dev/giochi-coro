@@ -1,0 +1,1170 @@
+/* ===========================
+   GIOCHI DEL CORO - STILI
+   =========================== */
+
+:root {
+  --bg-dark:      #0f0f1a;
+  --bg-card:      #1a1a2e;
+  --bg-card2:     #16213e;
+  --accent:       #e94560;
+  --text:         #eaeaea;
+  --text-muted:   #8892a4;
+  --border:       #2a2a4a;
+
+  /* Colori SATB */
+  --soprano:      #e74c3c;
+  --alto:         #f39c12;
+  --tenore:       #3498db;
+  --basso:        #2ecc71;
+
+  --soprano-dark: #922b21;
+  --alto-dark:    #9a6000;
+  --tenore-dark:  #1a5276;
+  --basso-dark:   #1a7a43;
+
+  --radius:       16px;
+  --radius-sm:    10px;
+  --shadow:       0 8px 32px rgba(0,0,0,0.4);
+  --transition:   0.25s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-dark);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  user-select: none;
+}
+
+/* ===========================
+   SCHERMATE
+   =========================== */
+
+.screen {
+  display: none;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0; left: 0;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.screen.active {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===========================
+   HEADER / LOGO
+   =========================== */
+
+/* ===========================
+   SELETTORE LINGUA
+   =========================== */
+
+.lang-switcher {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+
+.lang-btn {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 5px 11px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.lang-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.lang-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ===========================
+   SELETTORE MODALITÀ
+   =========================== */
+
+.mode-selector {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 40px;
+  justify-content: center;
+}
+
+.mode-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 40px;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text);
+  font-family: inherit;
+  min-width: 200px;
+}
+
+.mode-btn:hover {
+  border-color: var(--accent);
+  background: var(--bg-card2);
+  transform: translateY(-2px);
+}
+
+.mode-btn.active {
+  border-color: var(--accent);
+  background: rgba(233, 69, 96, 0.12);
+}
+
+.mode-btn-icon {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.mode-btn-label {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.mode-btn-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.app-title {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  background: linear-gradient(135deg, #e74c3c, #f39c12, #3498db, #2ecc71);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.app-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  margin-bottom: 48px;
+  text-align: center;
+}
+
+/* ===========================
+   CARD GRIGLIA
+   =========================== */
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  width: 100%;
+  max-width: 900px;
+}
+
+.card-grid.single-row {
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 800px;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 36px 28px;
+  cursor: pointer;
+  transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--card-color, var(--accent));
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.card:hover, .card:active {
+  transform: translateY(-4px);
+  border-color: var(--card-color, var(--accent));
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 0 1px var(--card-color, var(--accent));
+}
+
+.card-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 56px;
+}
+
+.card-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.card-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.card.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.card.disabled:hover {
+  transform: none;
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 99px;
+  margin-top: 10px;
+  background: var(--card-color, var(--accent));
+  color: white;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ===========================
+   TITOLO SEZIONE
+   =========================== */
+
+.screen-title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.screen-title span {
+  color: var(--accent);
+}
+
+.screen-desc {
+  font-size: 1rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 40px;
+  max-width: 600px;
+}
+
+/* ===========================
+   BOTTONE BACK
+   =========================== */
+
+.btn-back {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  color: var(--text);
+  font-size: 1rem;
+  padding: 10px 20px;
+  border-radius: 99px;
+  cursor: pointer;
+  z-index: 1000;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  font-weight: 600;
+}
+
+.btn-back:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ===========================
+   LIVELLI
+   =========================== */
+
+.levels-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.level-card {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 32px;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.level-card:hover {
+  transform: translateX(8px);
+  border-color: var(--level-color, var(--accent));
+  box-shadow: -4px 0 0 var(--level-color, var(--accent));
+}
+
+.level-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+}
+
+.level-info h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.level-info p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* BPM Control */
+.bpm-control {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 32px;
+  margin-top: 16px;
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.bpm-control label {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.bpm-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--accent);
+  min-width: 80px;
+  text-align: center;
+}
+
+.bpm-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  outline: none;
+  min-width: 200px;
+}
+
+.bpm-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 3px solid var(--bg-dark);
+}
+
+.bpm-slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 3px solid var(--bg-dark);
+}
+
+.bpm-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.bpm-btn {
+  background: var(--bg-card2);
+  border: 2px solid var(--border);
+  color: var(--text);
+  font-size: 1.2rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  transition: all var(--transition);
+  font-family: inherit;
+}
+
+.bpm-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ===========================
+   SCHERMATA GIOCO
+   =========================== */
+
+#screen-game {
+  padding: 0;
+  background: var(--bg-dark);
+}
+
+.game-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: rgba(0,0,0,0.3);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  gap: 16px;
+}
+
+.game-title-bar {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.game-bpm-display {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-bpm-inline {
+  background: transparent;
+  border: 1.5px solid #2a2a4a;
+  color: var(--text-muted);
+  font-size: 1rem;
+  font-weight: 700;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: border-color 0.15s, color 0.15s;
+  font-family: inherit;
+}
+
+.btn-bpm-inline:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.bpm-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse-dot 1s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.5); opacity: 0.5; }
+}
+
+.game-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-fullscreen {
+  padding: 8px 12px;
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.6;
+}
+.btn-fullscreen:hover { opacity: 1; }
+
+.btn-game {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  color: var(--text);
+  font-size: 0.9rem;
+  padding: 8px 20px;
+  border-radius: 99px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-game:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-game.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.btn-game.primary:hover {
+  filter: brightness(1.15);
+  color: white;
+}
+
+.game-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===========================
+   SIMON RITMICO
+   =========================== */
+
+#simon-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+  width: calc(100% - 48px);
+  height: calc(100% - 48px);
+  max-width: 900px;
+  max-height: 560px;
+}
+
+.simon-zone {
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  transition: filter 0.1s, transform 0.1s;
+  position: relative;
+  overflow: hidden;
+  border: 3px solid transparent;
+}
+
+.simon-zone.s { background: var(--soprano-dark); border-color: var(--soprano); }
+.simon-zone.a { background: var(--alto-dark);    border-color: var(--alto); }
+.simon-zone.t { background: var(--tenore-dark);  border-color: var(--tenore); }
+.simon-zone.b { background: var(--basso-dark);   border-color: var(--basso); }
+
+.simon-zone.active.s { background: var(--soprano); filter: brightness(1.3); transform: scale(1.02); }
+.simon-zone.active.a { background: var(--alto);    filter: brightness(1.3); transform: scale(1.02); }
+.simon-zone.active.t { background: var(--tenore);  filter: brightness(1.3); transform: scale(1.02); }
+.simon-zone.active.b { background: var(--basso);   filter: brightness(1.3); transform: scale(1.02); }
+
+.simon-zone {
+  position: relative; /* necessario per il gesto assoluto */
+}
+
+.simon-zone-label {
+  font-size: 3.5rem;
+  font-weight: 900;
+  opacity: 0.5;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  transition: opacity 0.1s;
+}
+
+.simon-zone.active .simon-zone-label { opacity: 0; /* sostituita dal gesto */ }
+
+.simon-zone-name {
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.simon-zone.active .simon-zone-name { opacity: 1; }
+
+#simon-status {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #eaeaea;
+  text-align: center;
+  min-height: 48px;
+  line-height: 1.4;
+}
+
+/* ===========================
+   TRENO CHE ACCELERA
+   =========================== */
+
+#treno-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  gap: 40px;
+}
+
+#treno-track {
+  width: 100%;
+  max-width: 860px;
+  position: relative;
+  height: 80px;
+  display: flex;
+  align-items: center;
+}
+
+#treno-rail {
+  width: 100%;
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  position: relative;
+}
+
+#treno-ball {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff6, transparent 60%), var(--accent);
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 24px var(--accent), 0 0 48px var(--accent)44;
+  transition: left 0.1s linear;
+}
+
+#treno-beat-counter {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+#treno-beats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 860px;
+}
+
+.treno-beat-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background 0.05s;
+  flex-shrink: 0;
+}
+
+.treno-beat-dot.active {
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+}
+
+.treno-beat-dot.past {
+  background: #333350;
+}
+
+#treno-phase-label {
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-align: center;
+  color: var(--text);
+  min-height: 40px;
+}
+
+#treno-beat-num {
+  font-size: 6rem;
+  font-weight: 900;
+  color: var(--accent);
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.05s;
+  min-height: 96px;
+  display: flex;
+  align-items: center;
+}
+
+#treno-beat-num.flash {
+  opacity: 1;
+}
+
+/* ===========================
+   PUZZLE RITMICO A CANONE
+   =========================== */
+
+#puzzle-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 32px;
+  gap: 12px;
+}
+
+.puzzle-row {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+}
+
+.puzzle-row-label {
+  width: 48px;
+  font-size: 1.5rem;
+  font-weight: 900;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.puzzle-beats {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0,0,0,0.2);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+}
+
+.puzzle-beat-cell {
+  flex: 1;
+  height: 100%;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+  transition: background 0.08s, transform 0.08s;
+  min-height: 40px;
+  position: relative;
+}
+
+.puzzle-beat-cell.rest {
+  /* empty/rest beat */
+}
+
+.puzzle-beat-cell.note.active {
+  transform: scaleY(1.1);
+}
+
+/* Cursore scorrevole */
+.puzzle-cursor {
+  position: absolute;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 10;
+  transition: left 0.08s linear;
+}
+
+/* ===========================
+   INDOVINA LA PAUSA
+   =========================== */
+
+#pausa-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  gap: 32px;
+}
+
+#pausa-sequence {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 900px;
+}
+
+.pausa-cell {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 800;
+  border: 2px solid var(--border);
+  background: var(--bg-card);
+  transition: all 0.1s;
+  flex-shrink: 0;
+}
+
+.pausa-cell.beat {
+  background: var(--bg-card2);
+}
+
+.pausa-cell.rest-cell {
+  background: transparent;
+  border-style: dashed;
+}
+
+.pausa-cell.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent);
+  transform: scale(1.15);
+}
+
+.pausa-cell.rest-cell.active {
+  background: rgba(233,69,96,0.2);
+  border-color: var(--accent);
+}
+
+.pausa-cell.past {
+  opacity: 0.4;
+}
+
+#pausa-status {
+  font-size: 2.5rem;
+  font-weight: 900;
+  text-align: center;
+  min-height: 60px;
+  letter-spacing: -1px;
+}
+
+#pausa-countdown {
+  font-size: 5rem;
+  font-weight: 900;
+  color: var(--accent);
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+#pausa-big-rest {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-align: center;
+  min-height: 36px;
+}
+
+/* ===========================
+   ANIMAZIONI GENERALI
+   =========================== */
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.screen.active > * {
+  animation: fade-in 0.35s ease forwards;
+}
+
+@keyframes flash-green {
+  0% { background: #2ecc71; }
+  100% { background: var(--bg-dark); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60%  { transform: translateX(-8px); }
+  40%, 80%  { transform: translateX(8px); }
+}
+
+.shake {
+  animation: shake 0.4s ease;
+}
+
+/* ===========================
+   OVERLAY MESSAGGI
+   =========================== */
+
+#message-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+#message-overlay.active {
+  display: flex;
+}
+
+#message-box {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 48px 64px;
+  text-align: center;
+  max-width: 500px;
+  box-shadow: var(--shadow);
+}
+
+#message-box h2 {
+  font-size: 2rem;
+  margin-bottom: 16px;
+}
+
+#message-box p {
+  color: var(--text-muted);
+  margin-bottom: 32px;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.msg-btn-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* ===========================
+   METRONOMO STANDALONE
+   =========================== */
+
+#metro-dots {
+  display: flex;
+  gap: 20px;
+  margin: 20px 0 16px;
+}
+
+.metro-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #1e1e32;
+  border: 2px solid #2a2a4a;
+  transition: background 0.06s, box-shadow 0.06s, transform 0.06s;
+}
+
+.metro-dot.up {
+  background: #3498db;
+  border-color: #3498db;
+  box-shadow: 0 0 18px #3498db88;
+  transform: scale(1.2);
+}
+
+.metro-dot.down {
+  background: #e94560;
+  border-color: #e94560;
+  box-shadow: 0 0 24px #e9456088;
+  transform: scale(1.4);
+}
+
+#metro-display {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: #1a1a2e;
+  border: 3px solid #2a2a4a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px 0 28px;
+  transition: border-color 0.07s, box-shadow 0.07s;
+}
+
+#metro-display.flash-up {
+  border-color: #3498db;
+  box-shadow: 0 0 48px #3498db44, inset 0 0 24px #3498db18;
+}
+
+#metro-display.flash-down {
+  border-color: #e94560;
+  box-shadow: 0 0 60px #e9456055, inset 0 0 28px #e9456022;
+}
+
+.metro-beat-num {
+  font-size: 7rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #3498db;
+  animation: metro-pop 0.15s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.metro-beat-num.down {
+  color: #e94560;
+}
+
+@keyframes metro-pop {
+  0%   { transform: scale(1.35); opacity: 0.7; }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+/* ===========================
+   RESPONSIVE LANDSCAPE
+   =========================== */
+
+@media (max-height: 600px) {
+  .app-title { font-size: 2rem; }
+  .app-subtitle { margin-bottom: 24px; }
+  .card { padding: 20px 16px; }
+  .card-icon { font-size: 2rem; margin-bottom: 8px; }
+  .card-title { font-size: 1.1rem; }
+}
+
+/* ===========================
+   MOBILE (max-width: 600px)
+   =========================== */
+@media (max-width: 768px) {
+  /* Schermate generali */
+  .screen { padding: 16px 12px; }
+
+  /* Home / Ritmica */
+  .app-title { font-size: 2rem; }
+  .app-subtitle { font-size: 0.85rem; margin-bottom: 20px; }
+
+  /* Selettore lingua */
+  .lang-switcher { top: 12px; right: 12px; }
+
+  /* Bottoni modalità Singoli/Coro */
+  .mode-selector { flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .mode-btn { min-width: unset; width: 100%; padding: 16px 20px; flex-direction: row; gap: 14px; }
+  .mode-btn-icon { font-size: 1.6rem; }
+  .mode-btn-label { font-size: 1rem; }
+  .mode-btn-sub { display: none; }
+
+  /* Griglia giochi */
+  .card-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .card { padding: 20px 12px; }
+  .card-icon { font-size: 2rem; margin-bottom: 8px; height: 40px; }
+  .card-title { font-size: 1.1rem; }
+  .card-desc { font-size: 0.78rem; }
+
+  /* Header gioco */
+  .game-header { padding: 8px 10px; gap: 8px; }
+  .game-title-bar { font-size: 0.85rem; }
+  .game-bpm-display { font-size: 0.8rem; gap: 4px; }
+  .btn-bpm-inline { width: 24px; height: 24px; font-size: 0.9rem; }
+  .bpm-value { font-size: 1rem; }
+  .btn-exit, .btn-reset { padding: 8px 12px; font-size: 0.8rem; }
+  .btn-start { padding: 8px 14px; font-size: 0.85rem; }
+
+  /* Simon: zone gesture e testi */
+  .simon-zone { gap: 2px; padding: 6px; }
+  .simon-zone-label { font-size: 1.6rem; margin-bottom: 0; }
+  .simon-zone-name { font-size: 0.58rem; letter-spacing: 0; opacity: 1; }
+
+  /* Schermata livello */
+  .level-card { padding: 16px 12px; }
+
+  /* Puzzle */
+  .puzzle-row-label { font-size: 1.1rem; width: 28px; }
+  .puzzle-beat-cell { font-size: 0.85rem; }
+  #puzzle-container { padding: 10px 8px; gap: 6px; }
+
+  /* Treno */
+  #treno-container { padding: 12px 16px; gap: 12px; }
+  #treno-phase-label { font-size: 1rem; min-height: 24px; }
+  #treno-beat-num { font-size: 3.5rem; min-height: 52px; }
+  #treno-track { height: 56px; }
+  #treno-ball { width: 44px; height: 44px; }
+  #treno-beats { gap: 7px; }
+  .treno-beat-dot { width: 16px; height: 16px; }
+  #treno-beat-counter { font-size: 0.9rem; }
+}
+
+/* Contatore sequenza Simon */
+#simon-seq-counter {
+  font-size: 1rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Pallino metronomo che pulsa */
+.beat-flash {
+  animation: beat-pulse 0.1s ease;
+}
+
+@keyframes beat-pulse {
+  0%   { transform: translate(-50%, -50%) scale(1.4); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}

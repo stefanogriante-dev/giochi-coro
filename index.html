@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>🎼 Giochi di Ritmica</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ===== SCHERMATA HOME ===== -->
+  <div id="screen-home" class="screen active">
+
+    <div class="lang-switcher">
+      <button class="lang-btn" data-lang="it" onclick="I18n.setLang('it')">IT</button>
+      <button class="lang-btn" data-lang="en" onclick="I18n.setLang('en')">EN</button>
+    </div>
+
+    <div class="app-title" data-i18n="app_title">🎼 Giochi di Ritmica</div>
+    <div class="app-subtitle" data-i18n="app_subtitle">Esercizi interattivi per coro polifonico a 4 voci (SATB)</div>
+
+    <div class="card-grid" style="grid-template-columns: repeat(3, 1fr); max-width: 1080px;">
+      <div class="card" style="--card-color: #e94560" onclick="App.goTo('ritmica')">
+        <span class="card-icon">
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+            <rect x="4"  y="18" width="8" height="26" rx="4" fill="#e94560"/>
+            <rect x="16" y="10" width="8" height="34" rx="4" fill="#e94560" opacity="0.85"/>
+            <rect x="28" y="22" width="8" height="22" rx="4" fill="#e94560" opacity="0.7"/>
+            <rect x="40" y="14" width="8" height="30" rx="4" fill="#e94560" opacity="0.55"/>
+          </svg>
+        </span>
+        <div class="card-title" data-i18n="card_ritmica_title">Ritmica</div>
+        <div class="card-desc" data-i18n="card_ritmica_desc">Precisione ritmica, stabilità del tempo, indipendenza delle voci</div>
+        <span class="badge" style="background:#e94560" data-i18n="card_ritmica_badge">4 esercizi</span>
+      </div>
+
+      <div class="card disabled" style="--card-color: #9b59b6; display:none">
+        <span class="card-icon">
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+            <ellipse cx="14" cy="40" rx="9" ry="6.5" fill="#9b59b6" transform="rotate(-15 14 40)"/>
+            <line x1="23" y1="37" x2="23" y2="10" stroke="#9b59b6" stroke-width="3" stroke-linecap="round"/>
+            <line x1="23" y1="10" x2="42" y2="16" stroke="#9b59b6" stroke-width="3" stroke-linecap="round"/>
+            <line x1="42" y1="16" x2="42" y2="27" stroke="#9b59b6" stroke-width="3" stroke-linecap="round"/>
+            <ellipse cx="33" cy="38" rx="9" ry="6.5" fill="#9b59b6" opacity="0.4" transform="rotate(-15 33 38)"/>
+          </svg>
+        </span>
+        <div class="card-title">Vocalità</div>
+        <div class="card-desc">Intonazione, dinamica, qualità del suono</div>
+        <span class="badge" style="background:#555">Prossimamente</span>
+      </div>
+
+      <div class="card" style="--card-color: #3498db" onclick="App.goTo('metronomo')">
+        <span class="card-icon">
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+            <polygon points="13,47 39,47 33,5 19,5" stroke="#3498db" stroke-width="2.5" stroke-linejoin="round" fill="#3498db" fill-opacity="0.12"/>
+            <line x1="26" y1="43" x2="37" y2="12" stroke="#3498db" stroke-width="2.5" stroke-linecap="round"/>
+            <rect x="32" y="15" width="11" height="7" rx="3.5" fill="#3498db"/>
+            <circle cx="26" cy="43" r="3" fill="#3498db"/>
+            <line x1="20" y1="22" x2="26" y2="22" stroke="#3498db" stroke-width="1.5" opacity="0.5"/>
+            <line x1="19" y1="30" x2="26" y2="30" stroke="#3498db" stroke-width="1.5" opacity="0.5"/>
+            <line x1="20" y1="38" x2="26" y2="38" stroke="#3498db" stroke-width="1.5" opacity="0.5"/>
+            <rect x="10" y="45" width="32" height="4" rx="2" fill="#3498db" opacity="0.4"/>
+          </svg>
+        </span>
+        <div class="card-title" data-i18n="card_metro_title">Metronomo</div>
+        <div class="card-desc" data-i18n="card_metro_desc">Segna il tempo con click acustico e segnale visivo, BPM regolabile</div>
+        <span class="badge" style="background:#3498db" data-i18n="card_metro_badge">Utilità</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SCHERMATA SELEZIONE GIOCO RITMICO ===== -->
+  <div id="screen-ritmica" class="screen">
+    <button class="btn-back" onclick="App.goTo('home')" data-i18n="btn_back">← Indietro</button>
+
+    <div class="screen-title" style="display:flex;align-items:center;gap:12px;">
+      <svg width="28" height="28" viewBox="0 0 52 52" fill="none" style="flex-shrink:0;">
+        <rect x="4"  y="18" width="8" height="26" rx="4" fill="#e94560"/>
+        <rect x="16" y="10" width="8" height="34" rx="4" fill="#e94560" opacity="0.85"/>
+        <rect x="28" y="22" width="8" height="22" rx="4" fill="#e94560" opacity="0.7"/>
+        <rect x="40" y="14" width="8" height="30" rx="4" fill="#e94560" opacity="0.55"/>
+      </svg>
+      <span data-i18n-html="ritmica_title">Esercizi <span>Ritmici</span></span>
+    </div>
+
+    <!-- Selezione modalità: Singoli / Coro -->
+    <div style="text-align:center;margin-bottom:12px;">
+      <div class="screen-desc" data-i18n="mode_title" style="margin-bottom:20px;">Come vuoi esercitarti?</div>
+      <div class="mode-selector">
+        <button class="mode-btn" id="mode-btn-singoli" onclick="App.setMode('singoli')">
+          <span class="mode-btn-icon">🎵</span>
+          <span class="mode-btn-label" data-i18n="mode_singoli">Singoli</span>
+          <span class="mode-btn-sub" data-i18n="mode_singoli_sub">Un solo esecutore</span>
+        </button>
+        <button class="mode-btn" id="mode-btn-coro" onclick="App.setMode('coro')">
+          <span class="mode-btn-icon">🎶</span>
+          <span class="mode-btn-label" data-i18n="mode_coro">Coro a 4 voci</span>
+          <span class="mode-btn-sub" data-i18n="mode_coro_sub">Soprano · Alto · Tenore · Basso</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Griglia giochi (visibile dopo selezione modalità) -->
+    <div id="game-cards-grid" class="card-grid" style="display:none;">
+      <div class="card" style="--card-color: #e74c3c" onclick="App.selectGame('simon')">
+        <span class="card-icon">
+          <svg width="48" height="48" viewBox="0 0 48 48">
+            <rect x="2"  y="2"  width="20" height="20" rx="5" fill="#e74c3c"/>
+            <rect x="26" y="2"  width="20" height="20" rx="5" fill="#f39c12"/>
+            <rect x="2"  y="26" width="20" height="20" rx="5" fill="#3498db"/>
+            <rect x="26" y="26" width="20" height="20" rx="5" fill="#2ecc71"/>
+          </svg>
+        </span>
+        <div class="card-title" data-i18n="simon_title">Simon Ritmico</div>
+        <div class="card-desc" id="simon-card-desc" data-i18n="simon_desc_coro">4 zone colorate per sezione</div>
+        <span class="badge" style="background:#e74c3c" data-i18n="simon_badge">Memoria ritmica</span>
+      </div>
+
+      <div class="card" style="--card-color: #f39c12" onclick="App.selectGame('treno')">
+        <span class="card-icon">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <line x1="4" y1="36" x2="44" y2="36" stroke="#f39c12" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="12" cy="36" r="2.5" fill="#f39c12"/>
+            <circle cx="26" cy="36" r="2.5" fill="#f39c12"/>
+            <circle cx="40" cy="36" r="2.5" fill="#f39c12"/>
+            <circle cx="24" cy="21" r="12" fill="#f39c12"/>
+            <circle cx="24" cy="21" r="6"  fill="#0f0f1a" opacity="0.35"/>
+          </svg>
+        </span>
+        <div class="card-title" data-i18n="treno_title">Il Treno</div>
+        <div class="card-desc" data-i18n="treno_desc">Segui il metronomo visivo: quando sparisce, mantieni il tempo a memoria</div>
+        <span class="badge" style="background:#f39c12" data-i18n="treno_badge">Stabilità del tempo</span>
+      </div>
+
+      <!-- Puzzle: solo per modalità Coro -->
+      <div class="card" id="card-puzzle" style="--card-color: #3498db" onclick="App.selectGame('puzzle')">
+        <span class="card-icon">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <line x1="4" y1="10" x2="44" y2="10" stroke="#e74c3c" stroke-width="1.5"/>
+            <ellipse cx="10" cy="10" rx="5" ry="3.5" fill="#e74c3c" transform="rotate(-12 10 10)"/>
+            <line x1="4" y1="22" x2="44" y2="22" stroke="#f39c12" stroke-width="1.5"/>
+            <ellipse cx="21" cy="22" rx="5" ry="3.5" fill="#f39c12" transform="rotate(-12 21 22)"/>
+            <line x1="4" y1="34" x2="44" y2="34" stroke="#3498db" stroke-width="1.5"/>
+            <ellipse cx="31" cy="34" rx="5" ry="3.5" fill="#3498db" transform="rotate(-12 31 34)"/>
+            <line x1="4" y1="46" x2="44" y2="46" stroke="#2ecc71" stroke-width="1.5"/>
+            <ellipse cx="40" cy="46" rx="5" ry="3.5" fill="#2ecc71" transform="rotate(-12 40 46)"/>
+          </svg>
+        </span>
+        <div class="card-title" data-i18n="puzzle_title">Puzzle a Canone</div>
+        <div class="card-desc" data-i18n="puzzle_desc">4 righe con pattern diversi in loop, sfalsati come un canone</div>
+        <span class="badge" style="background:#3498db" data-i18n="puzzle_badge">Indipendenza voci</span>
+      </div>
+
+      <div class="card" style="--card-color: #2ecc71" onclick="App.selectGame('battitempo')">
+        <span class="card-icon">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <line x1="4" y1="15" x2="44" y2="15" stroke="#2ecc71" stroke-width="1" opacity="0.55"/>
+            <line x1="4" y1="21" x2="44" y2="21" stroke="#2ecc71" stroke-width="1" opacity="0.55"/>
+            <line x1="4" y1="27" x2="44" y2="27" stroke="#2ecc71" stroke-width="1" opacity="0.55"/>
+            <line x1="4" y1="33" x2="44" y2="33" stroke="#2ecc71" stroke-width="1" opacity="0.55"/>
+            <line x1="4" y1="39" x2="44" y2="39" stroke="#2ecc71" stroke-width="1" opacity="0.55"/>
+            <ellipse cx="12" cy="27" rx="5.5" ry="4" fill="#2ecc71" transform="rotate(-14 12 27)"/>
+            <line x1="17"  y1="25" x2="17"  y2="10" stroke="#2ecc71" stroke-width="2"/>
+            <ellipse cx="29" cy="21" rx="5.5" ry="4" fill="none" stroke="#2ecc71" stroke-width="2" transform="rotate(-14 29 21)"/>
+            <line x1="34"  y1="19" x2="34"  y2="4"  stroke="#2ecc71" stroke-width="2"/>
+            <line x1="25"  y1="7"  x2="25"  y2="46" stroke="#e94560" stroke-width="2.5"/>
+            <polygon points="21,7 29,7 25,14" fill="#e94560"/>
+          </svg>
+        </span>
+        <div class="card-title" data-i18n="batti_title">Batti il Tempo</div>
+        <div class="card-desc" id="batti-card-desc" data-i18n="batti_desc_coro">4 righe di notazione ritmica in scorrimento, una per voce</div>
+        <span class="badge" style="background:#2ecc71" data-i18n="batti_badge">Lettura ritmica</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SCHERMATA SELEZIONE LIVELLO ===== -->
+  <div id="screen-livello" class="screen">
+    <button class="btn-back" onclick="App.goTo('ritmica')" data-i18n="btn_back">← Indietro</button>
+
+    <div class="screen-title" id="livello-game-title">Scegli il <span>Livello</span></div>
+    <div class="screen-desc" id="livello-game-desc"></div>
+
+    <div class="levels-container">
+      <div class="level-card" style="--level-color: #2ecc71" onclick="App.startGame('principiante')">
+        <span class="level-icon">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <rect x="14" y="10" width="8" height="18" rx="4" fill="#2ecc71"/>
+          </svg>
+        </span>
+        <div class="level-info">
+          <h3 data-i18n="level_p_name">Principiante</h3>
+          <p id="level-desc-p">Sequenze brevi, tempo comodo</p>
+        </div>
+      </div>
+
+      <div class="level-card" style="--level-color: #f39c12" onclick="App.startGame('intermedio')">
+        <span class="level-icon">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <rect x="7"  y="14" width="8" height="14" rx="4" fill="#f39c12"/>
+            <rect x="21" y="8"  width="8" height="20" rx="4" fill="#f39c12"/>
+          </svg>
+        </span>
+        <div class="level-info">
+          <h3 data-i18n="level_m_name">Intermedio</h3>
+          <p id="level-desc-m">Sequenze medie, ritmo sostenuto</p>
+        </div>
+      </div>
+
+      <div class="level-card" style="--level-color: #e74c3c" onclick="App.startGame('avanzato')">
+        <span class="level-icon">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <rect x="3"  y="18" width="8" height="12" rx="3" fill="#e74c3c" opacity="0.7"/>
+            <rect x="14" y="11" width="8" height="19" rx="3" fill="#e74c3c" opacity="0.85"/>
+            <rect x="25" y="4"  width="8" height="26" rx="3" fill="#e74c3c"/>
+          </svg>
+        </span>
+        <div class="level-info">
+          <h3 data-i18n="level_a_name">Avanzato</h3>
+          <p id="level-desc-a">Sequenze lunghe, ritmo serrato</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controllo BPM -->
+    <div class="bpm-control">
+      <label>♪ BPM</label>
+      <div class="bpm-buttons">
+        <button class="bpm-btn" onclick="App.changeBpm(-5)">−</button>
+        <button class="bpm-btn" onclick="App.changeBpm(+5)">+</button>
+      </div>
+      <input type="range" class="bpm-slider" id="bpm-slider" min="40" max="200" value="80"
+             oninput="App.setBpm(+this.value)">
+      <div class="bpm-value" id="bpm-display">80</div>
+      <span style="color:var(--text-muted); font-size:0.85rem">BPM</span>
+    </div>
+  </div>
+
+  <!-- ===== SCHERMATA GIOCO ===== -->
+  <div id="screen-game" class="screen">
+    <div class="game-wrapper">
+
+      <!-- Header controlli -->
+      <div class="game-header">
+        <button class="btn-game" onclick="App.exitGame()" data-i18n="btn_exit">✕ Esci</button>
+
+        <div class="game-title-bar" id="game-title-bar">—</div>
+
+        <div class="game-bpm-display">
+          <div class="bpm-dot" id="bpm-dot"></div>
+          <button class="btn-bpm-inline" onclick="App.changeBpm(-5)">−</button>
+          <span id="game-bpm-label">80 BPM</span>
+          <button class="btn-bpm-inline" onclick="App.changeBpm(+5)">+</button>
+        </div>
+
+        <div class="game-controls">
+          <button class="btn-game" id="btn-start-stop" onclick="App.toggleGame()" data-i18n="btn_start">▶ Inizia</button>
+          <button class="btn-game" onclick="App.resetGame()" data-i18n="btn_reset">↺ Reset</button>
+          <button class="btn-game btn-fullscreen" id="btn-fullscreen" onclick="App.toggleFullscreen()" title="Schermo intero">⛶</button>
+        </div>
+      </div>
+
+      <!-- Area gioco (popolata da JS) -->
+      <div class="game-area" id="game-area"></div>
+
+    </div>
+  </div>
+
+  <!-- ===== SCHERMATA METRONOMO ===== -->
+  <div id="screen-metronomo" class="screen">
+    <button class="btn-back" onclick="App.goTo('home')" data-i18n="btn_back">← Indietro</button>
+
+    <div class="screen-title" data-i18n="metro_title">Metronomo</div>
+
+    <!-- Quattro pallini beat -->
+    <div id="metro-dots">
+      <div class="metro-dot" id="metro-dot-0"></div>
+      <div class="metro-dot" id="metro-dot-1"></div>
+      <div class="metro-dot" id="metro-dot-2"></div>
+      <div class="metro-dot" id="metro-dot-3"></div>
+    </div>
+
+    <!-- Grande numero beat -->
+    <div id="metro-display">
+      <span id="metro-beat-num" class="metro-beat-num">-</span>
+    </div>
+
+    <!-- Controllo BPM -->
+    <div class="bpm-control" style="margin-bottom:0;">
+      <button class="bpm-btn" onclick="MetroApp.changeBpm(-10)" style="font-size:0.75rem;padding:6px 10px;">−10</button>
+      <button class="bpm-btn" onclick="MetroApp.changeBpm(-1)">−</button>
+      <div class="bpm-value" id="metro-bpm-val">80</div>
+      <span style="color:var(--text-muted);font-size:0.85rem">BPM</span>
+      <button class="bpm-btn" onclick="MetroApp.changeBpm(+1)">+</button>
+      <button class="bpm-btn" onclick="MetroApp.changeBpm(+10)" style="font-size:0.75rem;padding:6px 10px;">+10</button>
+    </div>
+    <input type="range" class="bpm-slider" id="metro-slider" min="20" max="300" value="80"
+           oninput="MetroApp.setBpm(+this.value)" style="max-width:380px;margin-top:8px;">
+
+    <button class="btn-game primary" id="metro-start-btn"
+            onclick="MetroApp.toggle()"
+            style="margin-top:32px;font-size:1.3rem;padding:16px 56px;border-radius:16px;"
+            data-i18n="metro_start">
+      ▶ Inizia
+    </button>
+  </div>
+
+  <!-- ===== OVERLAY MESSAGGI ===== -->
+  <div id="message-overlay">
+    <div id="message-box">
+      <h2 id="msg-title">Titolo</h2>
+      <p id="msg-body">Corpo del messaggio</p>
+      <div class="msg-btn-row">
+        <button class="btn-game primary" id="msg-ok" onclick="App.closeMessage()" data-i18n="btn_ok">OK</button>
+        <button class="btn-game" id="msg-cancel" onclick="App.closeMessage()" data-i18n="btn_cancel" style="display:none">Annulla</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script: i18n prima di tutto -->
+  <script src="js/i18n.js"></script>
+  <script src="js/metronomo.js"></script>
+  <script src="js/games/simon.js"></script>
+  <script src="js/games/treno.js"></script>
+  <script src="js/games/puzzle.js"></script>
+  <script src="js/games/battitempo.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+</html>
