@@ -46,10 +46,10 @@ class PuzzleGame {
     this._randomizePatterns();
 
     this.voices = [
-      { key: 's', label: 'S', name: 'Soprani',   color: '#e74c3c' },
-      { key: 'a', label: 'A', name: 'Contralti', color: '#f39c12' },
-      { key: 't', label: 'T', name: 'Tenori',    color: '#3498db' },
-      { key: 'b', label: 'B', name: 'Bassi',     color: '#2ecc71' },
+      { key: 's', label: 'S', name: 'Soprani',   color: '#ff4444' },
+      { key: 'a', label: 'A', name: 'Contralti', color: '#ffaa00' },
+      { key: 't', label: 'T', name: 'Tenori',    color: '#3ab4ff' },
+      { key: 'b', label: 'B', name: 'Bassi',     color: '#22e87a' },
     ];
 
     /* Sottodivisione: ottavi per animazione interna */
@@ -58,6 +58,10 @@ class PuzzleGame {
     this._subTimer    = null;
     this._timer       = null;
     this._playing     = false;
+    this._audioCtx    = null;
+    this._cdTimer     = null;
+    this._loopCounts  = [0, 0, 0, 0]; /* quanti loop completi ha fatto ogni voce */
+    this._finished    = false;
 
     this._build();
   }
@@ -72,8 +76,8 @@ class PuzzleGame {
 
   /* Icona per ogni valore */
   _icon(val) {
-    if (val === 2) return '<span style="letter-spacing:5px;font-size:0.95rem;">&#9834;&#9834;</span>';
-    if (val === 1) return '<span style="font-size:1.1rem;">&#9834;</span>';
+    if (val === 2) return '<span style="letter-spacing:6px;font-size:1.9rem;line-height:1;">&#9834;&#9834;</span>';
+    if (val === 1) return '<span style="font-size:2.2rem;line-height:1;">&#9834;</span>';
     return '';
   }
 
@@ -95,9 +99,9 @@ class PuzzleGame {
       html += '<div class="puzzle-beats" id="pb-' + v.key + '">';
 
       cells.forEach(function(val, bi) {
-        var bg    = val ? color + '33' : 'transparent';
-        var bord  = val ? color + '44' : 'transparent';
-        var extra = val === 2 ? 'outline:2px dashed ' + color + '55;outline-offset:-3px;' : '';
+        var bg    = val ? color + '55' : 'transparent';
+        var bord  = val ? color + 'aa' : 'transparent';
+        var extra = val === 2 ? 'outline:2px dashed ' + color + '99;outline-offset:-3px;' : '';
         html += '<div class="puzzle-beat-cell ' + (val ? 'note' : 'rest') + '"' +
                 ' id="pbc-' + v.key + '-' + bi + '"' +
                 ' style="background:' + bg + ';border:2px solid ' + bord + ';' + extra + '">' +
@@ -110,14 +114,16 @@ class PuzzleGame {
       html += '</div>';
 
       var entryLabel = offset === 0 ? I18n.t('enter_now') : I18n.t('enter_at_bar').replace('{n}', offset + 1);
-      html += '<div id="entry-' + v.key + '" style="font-size:0.75rem;color:' + color +
-              ';opacity:0.7;min-width:90px;text-align:left;flex-shrink:0;padding-left:8px;">' +
+      html += '<div id="entry-' + v.key + '" style="font-size:1rem;font-weight:700;color:' + color +
+              ';min-width:110px;text-align:left;flex-shrink:0;padding-left:12px;">' +
               entryLabel + '</div>';
       html += '</div>';
     });
 
     html += '</div>';
+    html += '<div id="puzzle-countdown" style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5rem;font-weight:900;color:#fff;text-shadow:0 2px 16px #000;pointer-events:none;z-index:10;"></div>';
     this.container.innerHTML = html;
+    this.container.style.position = 'relative';
   }
 
   get _beatMs()    { return Math.round(60000 / this.bpm); }
@@ -125,22 +131,96 @@ class PuzzleGame {
 
   start() {
     if (this._playing) return;
-    this._playing  = true;
-    this._beat     = 0;
-    this._subbeat  = 0;
-    this._tick();
+    this._playing = true;
+    var self = this;
+    this._playCountdown(function() {
+      if (!self._playing) return;
+      self._beat       = 0;
+      self._subbeat    = 0;
+      self._loopCounts = [0, 0, 0, 0];
+      self._finished   = false;
+      self._tick();
+    });
+  }
+
+  _playCountdown(callback) {
+    var self    = this;
+    var beatSec = 60 / this.bpm;
+    var beatMs  = Math.round(60000 / this.bpm);
+
+    /* Init AudioContext */
+    try {
+      if (!this._audioCtx) {
+        this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    } catch(e) {}
+
+    /* Pianifica i 4 click sul clock audio (funziona anche su iOS se ctx è running) */
+    var scheduleClicks = function() {
+      if (!self._audioCtx) return;
+      var ctx      = self._audioCtx;
+      var audioNow = ctx.currentTime;
+      for (var i = 0; i < 4; i++) {
+        (function(idx) {
+          var t = audioNow + idx * beatSec;
+          try {
+            var osc  = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.type            = 'triangle';
+            osc.frequency.value = idx === 0 ? 1100 : 720;
+            var vol = idx === 0 ? 0.35 : 0.20;
+            var dur = 0.055;
+            gain.gain.setValueAtTime(vol, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+            osc.start(t);
+            osc.stop(t + dur + 0.01);
+          } catch(e) {}
+        })(i);
+      }
+    };
+
+    if (this._audioCtx && this._audioCtx.state === 'suspended') {
+      this._audioCtx.resume().then(scheduleClicks, scheduleClicks);
+    } else {
+      scheduleClicks();
+    }
+
+    /* Countdown visivo: mostra 1 2 3 4 in sincronia */
+    var cdEl = document.getElementById('puzzle-countdown');
+    if (cdEl) cdEl.style.display = 'block';
+
+    for (var i = 0; i < 4; i++) {
+      (function(idx) {
+        setTimeout(function() {
+          if (!self._playing) return;
+          if (cdEl) cdEl.textContent = idx + 1;
+        }, idx * beatMs);
+      })(i);
+    }
+
+    /* Avvia il gioco dopo 4 beat */
+    this._cdTimer = setTimeout(function() {
+      if (cdEl) { cdEl.textContent = ''; cdEl.style.display = 'none'; }
+      callback();
+    }, 4 * beatMs);
   }
 
   pause() {
     this._playing = false;
     this._clearTimers();
     this._clearHighlights();
+    var cdEl = document.getElementById('puzzle-countdown');
+    if (cdEl) { cdEl.textContent = ''; cdEl.style.display = 'none'; }
   }
 
   stop() {
     this._playing = false;
     this._clearTimers();
     this._clearHighlights();
+    var cdEl = document.getElementById('puzzle-countdown');
+    if (cdEl) { cdEl.textContent = ''; cdEl.style.display = 'none'; }
   }
 
   updateBpm(bpm) { this.bpm = bpm; }
@@ -160,6 +240,24 @@ class PuzzleGame {
     }, this._subBeatMs);
 
     this._beat++;
+
+    /* Controlla se tutte le voci hanno completato 2 loop */
+    if (!this._finished) {
+      var loopLen = this.cfg.loopLen;
+      for (var vi2 = 0; vi2 < this.voices.length; vi2++) {
+        var off2 = this.cfg.offsets[vi2];
+        if (this._beat > off2 && (this._beat - off2) % loopLen === 0) {
+          this._loopCounts[vi2]++;
+        }
+      }
+      if (this._loopCounts.every(function(c) { return c >= 2; })) {
+        this._finished = true;
+        var selfF = this;
+        setTimeout(function() { selfF._finish(); }, selfF._beatMs);
+        return;
+      }
+    }
+
     this._timer = setTimeout(function() { self._tick(); }, this._beatMs);
   }
 
@@ -199,7 +297,7 @@ class PuzzleGame {
         for (var ci = 0; ci < cells.length; ci++) {
           var cell = document.getElementById('pbc-' + v.key + '-' + ci);
           if (cell) {
-            cell.style.background = cells[ci] ? color + '22' : 'transparent';
+            cell.style.background = cells[ci] ? color + '55' : 'transparent';
             cell.style.transform  = 'none';
             cell.style.boxShadow  = 'none';
             cell.style.filter     = '';
@@ -236,16 +334,16 @@ class PuzzleGame {
             cell.style.boxShadow  = '0 0 16px ' + color;
             cell.style.outline    = '';
           } else {
-            cell.style.background = color + '22';
+            cell.style.background = color + '55';
             cell.style.transform  = 'none';
             cell.style.boxShadow  = 'none';
             cell.style.outline    = '';
           }
         } else {
-          cell.style.background = val ? color + '33' : 'transparent';
+          cell.style.background = val ? color + '55' : 'transparent';
           cell.style.transform  = 'none';
           cell.style.boxShadow  = 'none';
-          cell.style.outline    = val === 2 ? '2px dashed ' + color + '55' : '';
+          cell.style.outline    = val === 2 ? '2px dashed ' + color + '99' : '';
           cell.style.outlineOffset = '-3px';
         }
       }
@@ -262,10 +360,10 @@ class PuzzleGame {
       self.patterns[vi].forEach(function(val, bi) {
         var cell = document.getElementById('pbc-' + v.key + '-' + bi);
         if (cell) {
-          cell.style.background    = val ? color + '33' : 'transparent';
+          cell.style.background    = val ? color + '55' : 'transparent';
           cell.style.transform     = 'none';
           cell.style.boxShadow     = 'none';
-          cell.style.outline       = val === 2 ? '2px dashed ' + color + '55' : '';
+          cell.style.outline       = val === 2 ? '2px dashed ' + color + '99' : '';
           cell.style.outlineOffset = '-3px';
           cell.style.filter        = '';
         }
@@ -275,8 +373,15 @@ class PuzzleGame {
     });
   }
 
+  _finish() {
+    this._playing = false;
+    this._clearTimers();
+    if (typeof Celebration !== 'undefined') Celebration.show('Bravo!');
+  }
+
   _clearTimers() {
     if (this._timer)    { clearTimeout(this._timer);    this._timer    = null; }
     if (this._subTimer) { clearTimeout(this._subTimer); this._subTimer = null; }
+    if (this._cdTimer)  { clearTimeout(this._cdTimer);  this._cdTimer  = null; }
   }
 }

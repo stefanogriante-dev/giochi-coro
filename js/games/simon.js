@@ -39,6 +39,7 @@ class SimonGame {
 
     this.gestureMode = null;
     this.sequence    = [];
+    this._audioCtx   = null;
     this.seqLen      = this.cfg.startLen;
     this._timer      = null;
     this._playing    = false;
@@ -125,9 +126,15 @@ class SimonGame {
                       'transform:translate(-50%,-50%);pointer-events:none;';
       var _isS = self.state.mode === 'singoli';
       gridHtml += '<div class="simon-zone ' + v.key + '" id="sz-' + v.key + '">';
-      gridHtml += '<div class="simon-zone-label" id="slabel-' + v.key + '" style="' + (_isS ? 'font-size:0.7rem;opacity:0.4;' : '') + '">' + (_isS ? '' : v.label) + '</div>';
+      var labelStyle = _isS
+        ? 'font-size:clamp(50px,8vh,90px);opacity:0.9;margin-bottom:6px;transition:opacity 0.1s;'
+        : 'font-size:clamp(60px,10vh,120px);font-weight:900;opacity:0.85;letter-spacing:2px;margin-bottom:6px;';
+      gridHtml += '<div class="simon-zone-label" id="slabel-' + v.key + '" style="' + labelStyle + '">' + (_isS ? v.label : v.label) + '</div>';
       gridHtml += '<div class="simon-gesture" id="sgesture-' + v.key + '" style="' + gestStyle + '">' + (_isS ? v.gesture : '\u{1F44F}') + '</div>';
-      gridHtml += '<div class="simon-zone-name">' + v.name + '</div>';
+      var nameStyle = _isS
+        ? 'font-size:clamp(20px,2.8vh,32px);font-weight:700;opacity:0.9;text-transform:uppercase;letter-spacing:3px;'
+        : 'font-size:clamp(20px,2.8vh,32px);font-weight:700;opacity:0.9;text-transform:uppercase;letter-spacing:3px;';
+      gridHtml += '<div class="simon-zone-name" style="' + nameStyle + '">' + v.name + '</div>';
       gridHtml += '</div>';
     });
     gridHtml += '</div>';
@@ -284,6 +291,7 @@ class SimonGame {
      ============================ */
   _activateZone(idx, gesture) {
     this._deactivateAll();
+    this._playGestureSound(gesture);
     var v    = this.voices[idx];
     var zone = document.getElementById('sz-' + v.key);
     var lbl  = document.getElementById('slabel-' + v.key);
@@ -299,6 +307,76 @@ class SimonGame {
         if (gest) gest.style.transform = 'translate(-50%,-50%) scale(1)';
       }, 120);
     }
+  }
+
+  /* ============================
+     AUDIO SINTETICO PER GESTI
+     ============================ */
+  _initAudio() {
+    try {
+      if (!this._audioCtx)
+        this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (this._audioCtx.state === 'suspended') this._audioCtx.resume();
+    } catch(e) {}
+  }
+
+  _playGestureSound(gesture) {
+    this._initAudio();
+    if (!this._audioCtx) return;
+    var ctx = this._audioCtx;
+    var t   = ctx.currentTime;
+    try {
+      if (gesture === '🫰') {        /* schiocco dita */
+        this._soundSnap(ctx, t);
+      } else if (gesture === '🦶') { /* piede */
+        this._soundFoot(ctx, t);
+      } else if (gesture === '🙌') { /* mani in alto: nessun suono */
+        /* silenzio */
+      } else {                               /* mani (clap / misto) */
+        this._soundClap(ctx, t);
+      }
+    } catch(e) {}
+  }
+
+  _soundClap(ctx, t) {
+    var sr = ctx.sampleRate, len = Math.round(sr * 0.18);
+    var buf = ctx.createBuffer(1, len, sr), d = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/len, 1.5);
+    var src = ctx.createBufferSource(); src.buffer = buf;
+    var bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1100; bp.Q.value=0.6;
+    var g = ctx.createGain(); g.gain.setValueAtTime(0.85,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.18);
+    src.connect(bp); bp.connect(g); g.connect(ctx.destination); src.start(t);
+  }
+
+  _soundSnap(ctx, t) {
+    var sr = ctx.sampleRate, len = Math.round(sr * 0.04);
+    var buf = ctx.createBuffer(1, len, sr), d = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/len, 5);
+    var src = ctx.createBufferSource(); src.buffer = buf;
+    var hp = ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=3500;
+    var g = ctx.createGain(); g.gain.setValueAtTime(1.0,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.04);
+    src.connect(hp); hp.connect(g); g.connect(ctx.destination); src.start(t);
+  }
+
+  _soundFoot(ctx, t) {
+    /* Tonfo molto grave: scende da 55 Hz a 18 Hz con decay lungo */
+    var osc = ctx.createOscillator(), og = ctx.createGain();
+    osc.type='sine'; osc.frequency.setValueAtTime(55,t); osc.frequency.exponentialRampToValueAtTime(18,t+0.35);
+    og.gain.setValueAtTime(2.0,t); og.gain.exponentialRampToValueAtTime(0.001,t+0.40);
+    osc.connect(og); og.connect(ctx.destination); osc.start(t); osc.stop(t+0.40);
+    /* Secondo oscillatore sub-basso per corpo */
+    var osc2 = ctx.createOscillator(), og2 = ctx.createGain();
+    osc2.type='triangle'; osc2.frequency.setValueAtTime(40,t); osc2.frequency.exponentialRampToValueAtTime(14,t+0.30);
+    og2.gain.setValueAtTime(1.4,t); og2.gain.exponentialRampToValueAtTime(0.001,t+0.35);
+    osc2.connect(og2); og2.connect(ctx.destination); osc2.start(t); osc2.stop(t+0.35);
+    /* Rumore d impatto breve */
+    var sr = ctx.sampleRate, len = Math.round(sr*0.05);
+    var buf = ctx.createBuffer(1,len,sr), d = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = (Math.random()*2-1)*Math.pow(1-i/len,3);
+    var ns = ctx.createBufferSource(); ns.buffer = buf;
+    var lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=400;
+    var ng = ctx.createGain(); ng.gain.setValueAtTime(0.9,t); ng.gain.exponentialRampToValueAtTime(0.001,t+0.05);
+    ns.connect(lp); lp.connect(ng); ng.connect(ctx.destination); ns.start(t);
   }
 
   _deactivateAll() {

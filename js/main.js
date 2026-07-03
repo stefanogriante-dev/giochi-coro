@@ -28,6 +28,7 @@ const App = (() => {
     treno:      { titleKey: 'game_treno_title',  descKey: 'game_treno_desc',  color: '#f39c12' },
     puzzle:     { titleKey: 'game_puzzle_title', descKey: 'game_puzzle_desc', color: '#3498db' },
     battitempo: { titleKey: 'game_batti_title',  descKey: 'game_batti_desc_coro', color: '#2ecc71' },
+    ingressi:   { titleKey: 'game_ingressi_title', descKey: 'game_ingressi_desc', color: '#9b59b6' },
   };
 
   /* ---- NOMI LIVELLI (chiavi i18n) ---- */
@@ -58,9 +59,11 @@ const App = (() => {
     const activeBtn = document.getElementById('mode-btn-' + mode);
     if (activeBtn) activeBtn.classList.add('active');
 
-    // Show/hide Puzzle (solo per coro)
+    // Show/hide Puzzle e Ingressi (solo per coro)
     const cardPuzzle = document.getElementById('card-puzzle');
     if (cardPuzzle) cardPuzzle.style.display = mode === 'coro' ? '' : 'none';
+    const cardIngressi = document.getElementById('card-ingressi');
+    if (cardIngressi) cardIngressi.style.display = mode === 'coro' ? '' : 'none';
 
     // Aggiorna descrizioni Simon e Batti in base alla modalità
     const simonDesc = document.getElementById('simon-card-desc');
@@ -82,12 +85,18 @@ const App = (() => {
     document.getElementById('livello-game-title').innerHTML =
       I18n.t(info.titleKey) + ' — <span>' + I18n.t('livello_word') + '</span>';
     document.getElementById('livello-game-desc').textContent = I18n.t(descKey);
-    document.getElementById('level-desc-p').textContent =
-      I18n.t('level_p_bpm').replace('{bpm}', BPM_DEFAULTS.principiante);
-    document.getElementById('level-desc-m').textContent =
-      I18n.t('level_m_bpm').replace('{bpm}', BPM_DEFAULTS.intermedio);
-    document.getElementById('level-desc-a').textContent =
-      I18n.t('level_a_bpm').replace('{bpm}', BPM_DEFAULTS.avanzato);
+    if (gameName === 'ingressi') {
+      document.getElementById('level-desc-p').textContent = 'Entrate ogni 4 battute · suggerito ' + BPM_DEFAULTS.principiante + ' BPM';
+      document.getElementById('level-desc-m').textContent = 'Entrate ogni 2 battute · suggerito ' + BPM_DEFAULTS.intermedio + ' BPM';
+      document.getElementById('level-desc-a').textContent = 'Canone stretto: entrate ogni battuta · suggerito ' + BPM_DEFAULTS.avanzato + ' BPM';
+    } else {
+      document.getElementById('level-desc-p').textContent =
+        I18n.t('level_p_bpm').replace('{bpm}', BPM_DEFAULTS.principiante);
+      document.getElementById('level-desc-m').textContent =
+        I18n.t('level_m_bpm').replace('{bpm}', BPM_DEFAULTS.intermedio);
+      document.getElementById('level-desc-a').textContent =
+        I18n.t('level_a_bpm').replace('{bpm}', BPM_DEFAULTS.avanzato);
+    }
     setBpm(80);
     goTo('livello');
   }
@@ -145,6 +154,7 @@ const App = (() => {
       case 'treno':      currentGameObj = new TrenoGame(area, gameState);      break;
       case 'puzzle':     currentGameObj = new PuzzleGame(area, gameState);     break;
       case 'battitempo': currentGameObj = new BattiTempoGame(area, gameState); break;
+      case 'ingressi':   currentGameObj = new IngressiGame(area, gameState);   break;
     }
 
     syncBpmDot();
@@ -255,3 +265,112 @@ const App = (() => {
   };
 
 })();
+
+/* ===========================
+   CELEBRATION
+   Confetti esplosione + suono vittoria + banner
+   Chiamato da _finish() nei giochi.
+   =========================== */
+const Celebration = (() => {
+
+  const COLORS = ['#ff4444','#ffaa00','#3ab4ff','#22e87a','#ff3a5e','#ffffff','#ffdd00'];
+  let _audioCtx = null;
+
+  function _getCtx() {
+    try {
+      if (!_audioCtx || _audioCtx.state === 'closed')
+        _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch(e) {}
+    return _audioCtx;
+  }
+
+  /* Accordo do maggiore arpeggiato (do-mi-sol-do') */
+  function playVictory() {
+    var ctx = _getCtx();
+    if (!ctx) return;
+    var resume = ctx.state === 'suspended' ? ctx.resume() : Promise.resolve();
+    resume.then(function() {
+      var freqs   = [261.63, 329.63, 392.00, 523.25];
+      var now     = ctx.currentTime;
+      freqs.forEach(function(freq, i) {
+        var osc  = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'triangle';
+        osc.frequency.value = freq;
+        var t = now + i * 0.07;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.22, t + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 1.6);
+        osc.start(t); osc.stop(t + 1.7);
+      });
+    });
+  }
+
+  /* Lancia i confetti dal centro */
+  function _launchConfetti() {
+    var overlay = document.getElementById('confetti-overlay');
+    if (!overlay) return;
+    overlay.innerHTML = '';
+    var count = 72;
+    for (var i = 0; i < count; i++) {
+      (function(idx) {
+        var el    = document.createElement('div');
+        var angle = (idx / count) * 360 + (Math.random() - 0.5) * 20;
+        var dist  = 120 + Math.random() * 240;
+        var size  = 7 + Math.random() * 11;
+        var color = COLORS[Math.floor(Math.random() * COLORS.length)];
+        var dur   = 0.9 + Math.random() * 0.6;
+        var rot   = (Math.random() > 0.5 ? 1 : -1) * (200 + Math.random() * 260);
+        var rad   = angle * Math.PI / 180;
+        var tx    = Math.cos(rad) * dist;
+        var ty    = Math.sin(rad) * dist;
+        var shape = Math.random() > 0.45 ? '50%' : '2px';
+        /* cssText non supporta custom properties: usiamo setProperty */
+        el.style.position   = 'absolute';
+        el.style.left       = '50%';
+        el.style.top        = '50%';
+        el.style.width      = size.toFixed(1) + 'px';
+        el.style.height     = size.toFixed(1) + 'px';
+        el.style.background = color;
+        el.style.borderRadius = shape;
+        el.style.animation  = 'confettiBurst ' + dur.toFixed(2) + 's ease-out ' + (idx * 0.008).toFixed(3) + 's both';
+        el.style.setProperty('--tx',  tx.toFixed(1)  + 'px');
+        el.style.setProperty('--ty',  ty.toFixed(1)  + 'px');
+        el.style.setProperty('--rot', rot.toFixed(0) + 'deg');
+        overlay.appendChild(el);
+      })(i);
+    }
+    setTimeout(function() { overlay.innerHTML = ''; }, 2200);
+  }
+
+  /* Banner "Ottimo!" con pop in/out */
+  function _showBanner(msg) {
+    var banner = document.getElementById('completion-banner');
+    var textEl = document.getElementById('completion-text');
+    if (!banner) return;
+    if (textEl) textEl.textContent = msg || 'Ottimo!';
+    banner.className = '';
+    banner.style.display = 'block';
+    void banner.offsetWidth;
+    banner.classList.add('pop-in');
+    setTimeout(function() {
+      banner.classList.remove('pop-in');
+      banner.classList.add('fade-out');
+      setTimeout(function() {
+        banner.style.display = 'none';
+        banner.className = '';
+      }, 420);
+    }, 2200);
+  }
+
+  function show(msg) {
+    _launchConfetti();
+    playVictory();
+    _showBanner(msg);
+  }
+
+  return { show: show, playVictory: playVictory };
+
+})();
+

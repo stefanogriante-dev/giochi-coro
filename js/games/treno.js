@@ -22,6 +22,8 @@ class TrenoGame {
     this._phase      = 'idle';
     this._cycleCount = 0;
     this._timer      = null;
+    this._cdTimer    = null;
+    this._audioCtx   = null;
     this._playing    = false;
 
     this._build();
@@ -56,7 +58,11 @@ class TrenoGame {
     this._beatCount  = 0;
     this._cycleCount = 0;
     this._globalBeat = 0;
-    this._startCycle('visible');
+    var self = this;
+    this._playCountdown(function() {
+      if (!self._playing) return;
+      self._startCycle('visible');
+    });
   }
 
   pause() {
@@ -107,6 +113,7 @@ class TrenoGame {
       this._flashBeat();
       this._updateDot();
       this._moveBall();
+      this._playClick();
       var counter = document.getElementById('treno-beat-counter');
       if (counter) {
         counter.textContent = I18n.t('cycle').replace('{n}', this._cycleCount + 1).replace('{total}', this.cfg.totalCycles);
@@ -195,6 +202,86 @@ class TrenoGame {
     }
   }
 
+  /* ============================
+     AUDIO
+     ============================ */
+  _initAudio() {
+    try {
+      if (!this._audioCtx)
+        this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (this._audioCtx.state === 'suspended') this._audioCtx.resume();
+    } catch(e) {}
+  }
+
+  /* Countdown 4 battiti prima di partire */
+  _playCountdown(callback) {
+    var self    = this;
+    var beatSec = 60 / this.bpm;
+    var beatMs  = Math.round(60000 / this.bpm);
+
+    this._initAudio();
+
+    var scheduleClicks = function() {
+      if (!self._audioCtx) return;
+      var ctx = self._audioCtx, now = ctx.currentTime;
+      for (var i = 0; i < 4; i++) {
+        (function(idx) {
+          var t = now + idx * beatSec;
+          try {
+            var osc = ctx.createOscillator(), g = ctx.createGain();
+            osc.connect(g); g.connect(ctx.destination);
+            osc.type = 'triangle';
+            osc.frequency.value = idx === 0 ? 1100 : 720;
+            g.gain.setValueAtTime(idx === 0 ? 0.35 : 0.22, t);
+            g.gain.exponentialRampToValueAtTime(0.001, t + 0.055);
+            osc.start(t); osc.stop(t + 0.07);
+          } catch(e) {}
+        })(i);
+      }
+    };
+
+    if (this._audioCtx && this._audioCtx.state === 'suspended') {
+      this._audioCtx.resume().then(scheduleClicks, scheduleClicks);
+    } else {
+      scheduleClicks();
+    }
+
+    /* Countdown visivo nel numero beat */
+    var numEl = document.getElementById('treno-beat-num');
+    for (var i = 0; i < 4; i++) {
+      (function(idx) {
+        setTimeout(function() {
+          if (!self._playing) return;
+          if (numEl) { numEl.textContent = idx + 1; numEl.classList.add('flash'); }
+          setTimeout(function() { if (numEl) numEl.classList.remove('flash'); }, 100);
+        }, idx * beatMs);
+      })(i);
+    }
+
+    this._cdTimer = setTimeout(function() {
+      if (numEl) numEl.textContent = '-';
+      callback();
+    }, 4 * beatMs);
+  }
+
+  /* Click sul beat (solo fase visibile) */
+  _playClick() {
+    this._initAudio();
+    if (!this._audioCtx) return;
+    var ctx = this._audioCtx;
+    var t   = ctx.currentTime;
+    var isDown = (this._beatCount % 4) === 0;
+    try {
+      var osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.connect(g); g.connect(ctx.destination);
+      osc.type = 'triangle';
+      osc.frequency.value = isDown ? 1100 : 720;
+      g.gain.setValueAtTime(isDown ? 0.30 : 0.18, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+      osc.start(t); osc.stop(t + 0.065);
+    } catch(e) {}
+  }
+
   _finish() {
     this._playing = false;
     this._showBall();
@@ -202,6 +289,7 @@ class TrenoGame {
     this._setPhaseLabel(I18n.t('well_done'));
     var counter = document.getElementById('treno-beat-counter');
     if (counter) counter.textContent = I18n.t('ex_completed');
+    if (typeof Celebration !== 'undefined') Celebration.show('Ottimo!');
   }
 
   _setPhaseLabel(txt) {
@@ -210,6 +298,7 @@ class TrenoGame {
   }
 
   _clearTimer() {
-    if (this._timer) { clearTimeout(this._timer); this._timer = null; }
+    if (this._timer)   { clearTimeout(this._timer);   this._timer   = null; }
+    if (this._cdTimer) { clearTimeout(this._cdTimer); this._cdTimer = null; }
   }
 }

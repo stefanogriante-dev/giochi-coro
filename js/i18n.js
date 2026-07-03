@@ -10,8 +10,9 @@ var I18n = (function () {
   var _tr = {
     it: {
       /* --- Home --- */
-      app_title:           '🎼 Giochi di Ritmica',
-      app_subtitle:        'Esercizi interattivi per coro polifonico a 4 voci (SATB)',
+      rotate_device:       'Ruota il dispositivo in orizzontale',
+      app_title:           'Giochi di Coro',
+      app_subtitle:        'Esercizi interattivi per coro polifonico SATB',
       card_ritmica_title:  'Ritmica',
       card_ritmica_desc:   'Precisione ritmica, stabilità del tempo, indipendenza delle voci',
       card_ritmica_badge:  '4 esercizi',
@@ -68,12 +69,17 @@ var I18n = (function () {
       game_treno_title:    'Il Treno',
       game_puzzle_title:   'Puzzle a Canone',
       game_batti_title:    'Batti il Tempo',
+      game_ingressi_title: 'Guida agli Ingressi',
       /* --- Descrizioni giochi --- */
       game_simon_desc:     'Ogni sezione esegue solo al suo turno. La sequenza si allunga ad ogni round.',
       game_treno_desc:     'Segui il beat visivo. Quando sparisce, mantieni il tempo a memoria.',
       game_puzzle_desc:    '4 righe sovrapposte, ognuna con il suo pattern. Ogni sezione segue solo la propria riga.',
       game_batti_desc_coro:     'Partitura ritmica in scorrimento: 20 misure in 4/4, una riga per voce. Battete le mani seguendo la vostra parte.',
       game_batti_desc_singoli:  'Partitura ritmica in scorrimento: 20 misure in 4/4, una sola riga. Batti le mani a tempo.',
+      game_ingressi_desc:       'Indicatore visivo per canoni: mostra a ogni sezione SATB quando deve entrare.',
+      ingressi_title:           'Guida agli Ingressi',
+      ingressi_desc:            'Semaforo visivo per canoni: indica quando ogni sezione deve entrare',
+      ingressi_badge:           'Canoni',
       /* --- Etichette gesti singoli --- */
       gesture_clap:        '👏 Mani',
       gesture_snap:        '🤌 Schiocco',
@@ -101,8 +107,9 @@ var I18n = (function () {
     },
     en: {
       /* --- Home --- */
-      app_title:           '🎼 Rhythm Games',
-      app_subtitle:        'Interactive exercises for 4-voice polyphonic choir (SATB)',
+      rotate_device:       'Rotate device to landscape',
+      app_title:           'Choir Games',
+      app_subtitle:        'Interactive exercises for SATB polyphonic choir',
       card_ritmica_title:  'Rhythm',
       card_ritmica_desc:   'Rhythmic precision, tempo stability, voice independence',
       card_ritmica_badge:  '4 exercises',
@@ -159,12 +166,17 @@ var I18n = (function () {
       game_treno_title:    'The Train',
       game_puzzle_title:   'Canon Puzzle',
       game_batti_title:    'Beat the Time',
+      game_ingressi_title: 'Entry Guide',
       /* --- Game descriptions --- */
       game_simon_desc:     'Each section performs only on its turn. The sequence grows longer each round.',
       game_treno_desc:     'Follow the visual beat. When it disappears, keep the tempo from memory.',
       game_puzzle_desc:    '4 overlapping rows, each with its own pattern. Each section follows only its own row.',
       game_batti_desc_coro:     'Scrolling rhythmic score: 20 bars in 4/4, one row per voice. Clap your hands following your part.',
       game_batti_desc_singoli:  'Scrolling rhythmic score: 20 bars in 4/4, one single row. Clap your hands in time.',
+      game_ingressi_desc:       'Visual indicator for canons: shows each SATB section when to enter.',
+      ingressi_title:           'Entry Guide',
+      ingressi_desc:            'Visual guide for canons: shows when each section should enter',
+      ingressi_badge:           'Canons',
       /* --- Single performer gesture labels --- */
       gesture_clap:        '👏 Clap',
       gesture_snap:        '🤌 Snap',
