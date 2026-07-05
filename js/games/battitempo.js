@@ -19,8 +19,7 @@ class BattiTempoGame {
       this.voices = [
         { key:'s', label:'S', name:'Soprani',   color:'#ff4444' },
         { key:'a', label:'A', name:'Contralti', color:'#ffaa00' },
-        { key:'t', label:'T', name:'Tenori',    color:'#3ab4ff' },
-        { key:'b', label:'B', name:'Bassi',     color:'#22e87a' },
+        { key:'u', label:'U', name:'Uomini',    color:'#a78bfa' },
       ];
     }
 
@@ -28,7 +27,7 @@ class BattiTempoGame {
     this.LW              = 52;   /* larghezza pannello label */
     this.MARG            = 18;   /* margine orizzontale interno (sinistra + destra) */
     this.ROWS            = 2;    /* righe di esercizio */
-    this.MEASURES_PER_ROW = 8;
+    this.MEASURES_PER_ROW = 7;
     this.MEASURES        = this.ROWS * this.MEASURES_PER_ROW;
     this.BEATS_PER       = 4;
     this.ROW_PAD         = 12;   /* px gap tra i due sistemi */
