@@ -19,12 +19,19 @@ class IngressiGame {
       { key: 'b', label: 'B', name: 'Bassi',     color: '#1a7a4a', dark: 'rgba(0,0,0,0.38)' },
     ];
 
-    this._slots = [
-      { vi: 0, bar: 0,       beat: 0 },
-      { vi: 1, bar: off,     beat: 0 },
-      { vi: 2, bar: off * 2, beat: 0 },
-      { vi: 3, bar: off * 3, beat: 0 },
-    ];
+    /* Ripristina slot salvati da un reset precedente, altrimenti default */
+    if (state._savedSlots && state._savedSlots.length === 4) {
+      this._slots = state._savedSlots.map(function(s) {
+        return { vi: s.vi, bar: s.bar, beat: s.beat };
+      });
+    } else {
+      this._slots = [
+        { vi: 0, bar: 0,       beat: 0 },
+        { vi: 1, bar: off,     beat: 0 },
+        { vi: 2, bar: off * 2, beat: 0 },
+        { vi: 3, bar: off * 3, beat: 0 },
+      ];
+    }
 
     this._beat           = 0;
     this._playing        = false;

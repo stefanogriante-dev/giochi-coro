@@ -176,6 +176,14 @@ const App = (() => {
   }
 
   function resetGame() {
+    /* Preserva la configurazione slot di IngressiGame tra un reset e l'altro */
+    if (currentGameObj && currentGameObj._slots) {
+      state._savedSlots = currentGameObj._slots.map(function(s) {
+        return { vi: s.vi, bar: s.bar, beat: s.beat };
+      });
+    } else if (state.game !== 'ingressi') {
+      state._savedSlots = null;
+    }
     stopCurrentGame();
     initGame();
   }
@@ -355,22 +363,16 @@ const Celebration = (() => {
     void banner.offsetWidth;
     banner.classList.add('pop-in');
     setTimeout(function() {
-      banner.classList.remove('pop-in');
-      banner.classList.add('fade-out');
-      setTimeout(function() {
-        banner.style.display = 'none';
-        banner.className = '';
-      }, 420);
+      banner.classList.add('pop-out');
+      setTimeout(function() { banner.style.display = 'none'; }, 600);
     }, 2200);
   }
-
-  function show(msg) {
-    _launchConfetti();
+  function celebrate(msg) {
     playVictory();
+    _launchConfetti();
     _showBanner(msg);
   }
 
-  return { show: show, playVictory: playVictory };
+  return { celebrate };
 
 })();
-
