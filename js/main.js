@@ -122,7 +122,7 @@ const App = (() => {
     if (slider) slider.value = val;
     const label = document.getElementById('game-bpm-label');
     if (label) label.textContent = val + ' BPM';
-    if (state.running && currentGameObj) {
+    if (currentGameObj) {
       currentGameObj.updateBpm && currentGameObj.updateBpm(val);
     }
   }
