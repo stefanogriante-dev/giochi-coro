@@ -1,5 +1,5 @@
 /* ===========================
-   GUIDA AGLI INGRESSI  v4
+   GUIDA AGLI INGRESSI  v5
    Tutti gli stili inline — nessuna dipendenza da classi CSS.
    =========================== */
 
@@ -41,6 +41,8 @@ class IngressiGame {
     this._voiceStates    = ['wait','wait','wait','wait'];
     this._configListener = null;
     this._changeListener = null;
+    this._chordOscs      = [];
+    this._chordTimer     = null;
 
     this._buildConfig();
   }
@@ -56,15 +58,23 @@ class IngressiGame {
   /* === stili inline condivisi === */
 
   _S() {
-    /* Stili comuni riusabili */
     return {
+      wrapper: [
+        'width:calc(100% - 80px)',
+        'height:calc(100% - 80px)',
+        'display:flex',
+        'flex-direction:column',
+        'gap:14px',
+        'box-sizing:border-box',
+      ].join(';'),
+
       grid: [
         'display:grid',
         'grid-template-columns:1fr 1fr',
         'grid-template-rows:1fr 1fr',
         'gap:14px',
-        'width:calc(100% - 80px)',
-        'height:calc(100% - 80px)',
+        'flex:1',
+        'min-height:0',
         'box-sizing:border-box',
       ].join(';'),
 
@@ -168,6 +178,128 @@ class IngressiGame {
 
 
   /* ===========================
+     CHORD STRIP
+     =========================== */
+
+  _buildChordStrip() {
+    var self = this;
+
+    var CHORDS = [
+      /* === MAGGIORI === */
+      { name:'Do',   notes:[261.63, 329.63, 392.00, 523.25], min:false },
+      { name:'Re',   notes:[293.66, 369.99, 440.00, 587.33], min:false },
+      { name:'Mi',   notes:[329.63, 415.30, 493.88, 659.25], min:false },
+      { name:'Fa',   notes:[349.23, 440.00, 523.25, 698.46], min:false },
+      { name:'Sol',  notes:[196.00, 246.94, 293.66, 392.00], min:false },
+      { name:'La',   notes:[220.00, 277.18, 329.63, 440.00], min:false },
+      { name:'Si',   notes:[246.94, 311.13, 369.99, 493.88], min:false },
+      { name:'Sib',  notes:[233.08, 293.66, 349.23, 466.16], min:false },
+      { name:'Mib',  notes:[311.13, 392.00, 466.16, 622.25], min:false },
+      /* === MINORI === */
+      { name:'Do m', notes:[261.63, 311.13, 392.00, 523.25], min:true  },
+      { name:'Re m', notes:[293.66, 349.23, 440.00, 587.33], min:true  },
+      { name:'Mi m', notes:[329.63, 392.00, 493.88, 659.25], min:true  },
+      { name:'Sol m',notes:[196.00, 233.08, 293.66, 392.00], min:true  },
+      { name:'La m', notes:[220.00, 261.63, 329.63, 440.00], min:true  },
+      { name:'Si m', notes:[246.94, 293.66, 369.99, 493.88], min:true  },
+    ];
+
+    var strip = document.createElement('div');
+    strip.id = 'ing-chord-strip';
+    strip.style.cssText = [
+      'flex-shrink:0',
+      'display:flex',
+      'flex-wrap:wrap',
+      'gap:8px 10px',
+      'justify-content:center',
+      'align-items:center',
+      'padding:10px 4px 6px',
+      'border-top:1px solid rgba(255,255,255,0.10)',
+      'overflow-y:auto',
+      'max-height:130px',
+    ].join(';');
+
+    CHORDS.forEach(function(ch) {
+      var btn = document.createElement('button');
+      btn.textContent = ch.name;
+      var isMaj = !ch.min;
+      btn.style.cssText = [
+        'padding:7px 16px',
+        'border-radius:20px',
+        'border:2px solid ' + (isMaj ? 'rgba(251,191,36,0.55)' : 'rgba(139,92,246,0.55)'),
+        'background:' + (isMaj ? 'rgba(251,191,36,0.10)' : 'rgba(139,92,246,0.10)'),
+        'color:' + (isMaj ? '#fde68a' : '#c4b5fd'),
+        'font-family:inherit',
+        'font-size:clamp(0.72rem,1.5vw,0.90rem)',
+        'font-weight:800',
+        'cursor:pointer',
+        'letter-spacing:0.5px',
+        'transition:all 0.12s',
+        'user-select:none',
+        '-webkit-user-select:none',
+        'white-space:nowrap',
+        '-webkit-tap-highlight-color:transparent',
+        'outline:none',
+      ].join(';');
+
+      btn.addEventListener('click', function() { self._playChord(ch, btn); });
+      strip.appendChild(btn);
+    });
+
+    return strip;
+  }
+
+  _playChord(chord, btn) {
+    var self = this;
+    this._initAudio();
+    if (!this._audioCtx) return;
+
+    /* Ferma accordo precedente */
+    if (this._chordOscs.length) {
+      this._chordOscs.forEach(function(o) { try { o.stop(0); } catch(e) {} });
+      this._chordOscs = [];
+    }
+    if (this._chordTimer) { clearTimeout(this._chordTimer); this._chordTimer = null; }
+
+    /* Reset visivo tutti i bottoni */
+    var allBtns = document.querySelectorAll('#ing-chord-strip button');
+    allBtns.forEach(function(b) {
+      b.style.boxShadow = '';
+      b.style.transform = '';
+    });
+
+    /* Evidenzia bottone attivo */
+    btn.style.boxShadow = '0 0 18px 6px rgba(255,255,255,0.30)';
+    btn.style.transform = 'scale(1.12)';
+
+    var ctx = this._audioCtx;
+    var now = ctx.currentTime;
+    var dur = 5.0, attack = 0.25, release = 0.9;
+
+    chord.notes.forEach(function(freq) {
+      var osc  = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.15, now + attack);
+      gain.gain.setValueAtTime(0.15, now + dur - release);
+      gain.gain.linearRampToValueAtTime(0.0001, now + dur);
+      osc.start(now);
+      osc.stop(now + dur + 0.05);
+      self._chordOscs.push(osc);
+    });
+
+    this._chordTimer = setTimeout(function() {
+      if (btn) { btn.style.boxShadow = ''; btn.style.transform = ''; }
+      self._chordOscs = [];
+    }, dur * 1000);
+  }
+
+
+  /* ===========================
      CONFIG
      =========================== */
 
@@ -175,15 +307,23 @@ class IngressiGame {
     var self = this;
     this.container.style.cssText = '';   /* lascia .game-area flex centrato */
 
-    var S   = this._S();
-    var html = '<div id="ing-grid" style="' + S.grid + '">';
-    this._slots.forEach(function(slot, si) {
-      html += self._cellHtml(si, self.voices[slot.vi], 'config', S);
-    });
-    html += '</div>';
-    this.container.innerHTML = html;
+    var S = this._S();
 
-    var root = document.getElementById('ing-grid');
+    var wrapper = document.createElement('div');
+    wrapper.id = 'ing-wrapper';
+    wrapper.style.cssText = S.wrapper;
+
+    var gridDiv = document.createElement('div');
+    gridDiv.id = 'ing-grid';
+    gridDiv.style.cssText = S.grid;
+
+    this._slots.forEach(function(slot, si) {
+      gridDiv.innerHTML += self._cellHtml(si, self.voices[slot.vi], 'config', S);
+    });
+
+    wrapper.appendChild(gridDiv);
+    wrapper.appendChild(this._buildChordStrip());
+    this.container.appendChild(wrapper);
 
     this._configListener = function(e) {
       var vDiv = e.target.closest('[data-voice-slot]');
@@ -211,8 +351,8 @@ class IngressiGame {
       if (field === 'beat') self._slots[si].beat = parseInt(sel.value);
     };
 
-    root.addEventListener('click',  this._configListener);
-    root.addEventListener('change', this._changeListener);
+    gridDiv.addEventListener('click',  this._configListener);
+    gridDiv.addEventListener('change', this._changeListener);
   }
 
   _cellHtml(si, v, mode, S) {
@@ -302,13 +442,23 @@ class IngressiGame {
     var self = this;
     this.container.style.cssText = '';
 
-    var S   = this._S();
-    var html = '<div id="ing-grid" style="' + S.grid + '">';
+    var S = this._S();
+
+    var wrapper = document.createElement('div');
+    wrapper.id = 'ing-wrapper';
+    wrapper.style.cssText = S.wrapper;
+
+    var gridDiv = document.createElement('div');
+    gridDiv.id = 'ing-grid';
+    gridDiv.style.cssText = S.grid;
+
     this._slots.forEach(function(slot, si) {
-      html += self._cellHtml(si, self.voices[slot.vi], 'game', S);
+      gridDiv.innerHTML += self._cellHtml(si, self.voices[slot.vi], 'game', S);
     });
-    html += '</div>';
-    this.container.innerHTML = html;
+
+    wrapper.appendChild(gridDiv);
+    wrapper.appendChild(this._buildChordStrip());
+    this.container.appendChild(wrapper);
   }
 
   _tick() {
@@ -380,7 +530,18 @@ class IngressiGame {
   }
 
   pause()        { this._playing = false; this._clearTimer(); }
-  stop()         { this._playing = false; this._clearTimer(); this._removeConfigListeners(); }
+
+  stop() {
+    this._playing = false;
+    this._clearTimer();
+    this._removeConfigListeners();
+    if (this._chordOscs.length) {
+      this._chordOscs.forEach(function(o) { try { o.stop(0); } catch(e) {} });
+      this._chordOscs = [];
+    }
+    if (this._chordTimer) { clearTimeout(this._chordTimer); this._chordTimer = null; }
+  }
+
   updateBpm(bpm) { this.bpm = bpm; }
 
 
