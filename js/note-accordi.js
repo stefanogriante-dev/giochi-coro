@@ -131,11 +131,11 @@ const NoteAccordi = (() => {
     osc.type = 'sine'; osc.frequency.value = freq;
     gain.gain.setValueAtTime(0, now);
     gain.gain.linearRampToValueAtTime(0.45, now + 0.02);
-    gain.gain.setValueAtTime(0.45, now + 0.20);
-    gain.gain.linearRampToValueAtTime(0.0001, now + 0.32);
-    osc.start(now); osc.stop(now + 0.35);
+    gain.gain.setValueAtTime(0.45, now + 0.32);
+    gain.gain.linearRampToValueAtTime(0.0001, now + 0.40);
+    osc.start(now); osc.stop(now + 0.42);
     _arpState.idx++;
-    _arpState.timer = setTimeout(_arpTick, 340);
+    _arpState.timer = setTimeout(_arpTick, 400);
   }
 
   /* ---- Feedback visivo ---- */
@@ -222,14 +222,15 @@ const NoteAccordi = (() => {
     { name:'Mib m', notes:[311.13,369.99,466.16,622.25] },
   ];
 
+  /* Pattern su-giù: radice→3a→5a→3a→radice */
   var ARPEGGIOS = [
-    { name:'Do',  notes:[261.63,329.63,392.00,523.25] },
-    { name:'Re',  notes:[293.66,369.99,440.00,587.33] },
-    { name:'Mi',  notes:[329.63,415.30,493.88,659.25] },
-    { name:'Fa',  notes:[349.23,440.00,523.25,698.46] },
-    { name:'Sol', notes:[196.00,246.94,293.66,392.00] },
-    { name:'La',  notes:[220.00,277.18,329.63,440.00] },
-    { name:'Si',  notes:[246.94,311.13,369.99,493.88] },
+    { name:'Do',  notes:[261.63,329.63,392.00,329.63,261.63] },
+    { name:'Re',  notes:[293.66,369.99,440.00,369.99,293.66] },
+    { name:'Mi',  notes:[329.63,415.30,493.88,415.30,329.63] },
+    { name:'Fa',  notes:[349.23,440.00,523.25,440.00,349.23] },
+    { name:'Sol', notes:[196.00,246.94,293.66,246.94,196.00] },
+    { name:'La',  notes:[220.00,277.18,329.63,277.18,220.00] },
+    { name:'Si',  notes:[246.94,311.13,369.99,311.13,246.94] },
   ];
 
   /* ---- Costruzione UI ---- */
