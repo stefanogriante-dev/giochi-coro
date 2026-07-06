@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <title>Giochi di Coro</title>
-  <link rel="stylesheet" href="css/style.css?v=3">
+  <link rel="stylesheet" href="css/style.css?v=4">
 </head>
 <body>
 
@@ -39,7 +39,7 @@
     <div class="app-title" data-i18n="app_title">Giochi di Coro</div>
     <div class="app-subtitle" data-i18n="app_subtitle">Esercizi interattivi per coro polifonico SATB</div>
 
-    <div class="card-grid" style="grid-template-columns: repeat(2, 1fr); max-width: 760px;">
+    <div class="card-grid" style="grid-template-columns: repeat(2, 1fr); max-width: 900px;">
       <div class="card" style="--card-color: #e94560" onclick="App.goTo('ritmica')">
         <span class="card-icon">
           <!-- Piano roll SATB: 4 track colorate con blocchi ritmici + cursore -->
@@ -84,6 +84,32 @@
         <span class="badge" style="background:#555">Prossimamente</span>
       </div>
 
+      <div class="card" style="--card-color: #1abc9c" onclick="App.goTo('note-accordi')">
+        <span class="card-icon">
+          <svg width="64" height="48" viewBox="0 0 64 48" fill="none">
+            <!-- 7 tasti bianchi -->
+            <rect x="1"  y="1" width="7" height="46" rx="2.5" fill="rgba(255,255,255,0.88)" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+            <rect x="10" y="1" width="7" height="46" rx="2.5" fill="rgba(255,255,255,0.88)" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+            <rect x="19" y="1" width="7" height="46" rx="2.5" fill="rgba(255,255,255,0.88)" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+            <rect x="28" y="1" width="7" height="46" rx="2.5" fill="rgba(255,255,255,0.88)" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+            <rect x="37" y="1" width="7" height="46" rx="2.5" fill="rgba(255,255,255,0.88)" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+            <rect x="46" y="1" width="7" height="46" rx="2.5" fill="rgba(255,255,255,0.88)" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+            <rect x="55" y="1" width="7" height="46" rx="2.5" fill="rgba(255,255,255,0.88)" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+            <!-- 5 tasti neri -->
+            <rect x="7"  y="1" width="5" height="29" rx="2" fill="#1a1a2e"/>
+            <rect x="16" y="1" width="5" height="29" rx="2" fill="#1a1a2e"/>
+            <rect x="34" y="1" width="5" height="29" rx="2" fill="#1a1a2e"/>
+            <rect x="43" y="1" width="5" height="29" rx="2" fill="#1a1a2e"/>
+            <rect x="52" y="1" width="5" height="29" rx="2" fill="#1a1a2e"/>
+            <!-- nota colorata sull'ultimo tasto -->
+            <circle cx="58" cy="40" r="4" fill="#1abc9c" opacity="0.85"/>
+          </svg>
+        </span>
+        <div class="card-title">Note e Accordi</div>
+        <div class="card-desc">Ascolta note e accordi per intonare e trovare la voce</div>
+        <span class="badge" style="background:#1abc9c">Intonazione</span>
+      </div>
+
       <div class="card" style="--card-color: #3498db" onclick="App.goTo('metronomo')">
         <span class="card-icon">
           <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
@@ -102,6 +128,13 @@
         <span class="badge" style="background:#3498db" data-i18n="card_metro_badge">Utilità</span>
       </div>
     </div>
+  </div>
+
+  <!-- ===== SCHERMATA NOTE E ACCORDI ===== -->
+  <div id="screen-note-accordi" class="screen">
+    <button class="btn-back" onclick="App.goTo('home')" data-i18n="btn_back">← Indietro</button>
+    <div class="screen-title">Note e <span>Accordi</span></div>
+    <div id="na-content" style="overflow-y:auto;flex:1;width:100%;padding-top:8px;"></div>
   </div>
 
   <!-- ===== SCHERMATA SELEZIONE GIOCO RITMICO ===== -->
@@ -403,14 +436,15 @@
   </div>
 
   <!-- Script: i18n prima di tutto -->
-  <script src="js/i18n.js?v=3"></script>
-  <script src="js/metronomo.js?v=3"></script>
-  <script src="js/games/simon.js?v=3"></script>
-  <script src="js/games/treno.js?v=3"></script>
-  <script src="js/games/puzzle.js?v=3"></script>
-  <script src="js/games/battitempo.js?v=3"></script>
-  <script src="js/games/ingressi.js?v=3"></script>
-  <script src="js/main.js?v=3"></script>
+  <script src="js/i18n.js?v=4"></script>
+  <script src="js/metronomo.js?v=4"></script>
+  <script src="js/games/simon.js?v=4"></script>
+  <script src="js/games/treno.js?v=4"></script>
+  <script src="js/games/puzzle.js?v=4"></script>
+  <script src="js/games/battitempo.js?v=4"></script>
+  <script src="js/games/ingressi.js?v=4"></script>
+  <script src="js/note-accordi.js?v=4"></script>
+  <script src="js/main.js?v=4"></script>
 
 </body>
 </html>
