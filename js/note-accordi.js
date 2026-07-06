@@ -124,18 +124,28 @@ const NoteAccordi = (() => {
 
   function _arpTick() {
     if (!_arpState) return;
-    var freq = _arpState.notes[_arpState.idx % _arpState.notes.length];
+    var notes = _arpState.notes;
+    var idx   = _arpState.idx;
+
+    /* Tutte le note suonate: aspetta il decadimento dell'ultima e spegni */
+    if (idx >= notes.length) {
+      _arpState.timer = setTimeout(_stopArp, 1000);
+      return;
+    }
+
+    var freq = notes[idx];
     var ctx = _audioCtx, now = ctx.currentTime;
     var osc = ctx.createOscillator(), gain = ctx.createGain();
     osc.connect(gain); gain.connect(_dest());
     osc.type = 'sine'; osc.frequency.value = freq;
     gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(0.45, now + 0.02);
-    gain.gain.setValueAtTime(0.45, now + 0.32);
-    gain.gain.linearRampToValueAtTime(0.0001, now + 0.40);
-    osc.start(now); osc.stop(now + 0.42);
+    gain.gain.linearRampToValueAtTime(0.45, now + 0.03);
+    gain.gain.setValueAtTime(0.45, now + 0.72);
+    gain.gain.linearRampToValueAtTime(0.0001, now + 0.95);
+    osc.start(now); osc.stop(now + 1.0);
+
     _arpState.idx++;
-    _arpState.timer = setTimeout(_arpTick, 400);
+    _arpState.timer = setTimeout(_arpTick, 700);
   }
 
   /* ---- Feedback visivo ---- */
