@@ -9,10 +9,9 @@ const NoteAccordi = (() => {
 
   let _audioCtx    = null;
   let _compressor  = null;
-  let _noteStates  = {};   /* key=freq -> { osc, gain } */
-  let _chordState  = null; /* { oscs, gains, btn } */
+  let _noteStates  = {};
+  let _chordState  = null;
 
-  /* ---- Audio init ---- */
   function _initAudio() {
     try {
       if (!_audioCtx) {
@@ -31,15 +30,12 @@ const NoteAccordi = (() => {
 
   function _dest() { return _compressor || _audioCtx.destination; }
 
-  /* ---- Nota singola: toggle, più note insieme ---- */
+  /* ---- Nota: toggle, più note insieme ---- */
   function _toggleNote(note, btn) {
     _initAudio();
     if (!_audioCtx) return;
-
     var key = String(note.freq);
-
     if (_noteStates[key]) {
-      /* Spegni */
       var s = _noteStates[key];
       var now = _audioCtx.currentTime;
       s.gain.gain.cancelScheduledValues(now);
@@ -49,14 +45,12 @@ const NoteAccordi = (() => {
       delete _noteStates[key];
       _setNoteActive(btn, false);
     } else {
-      /* Accendi */
       var ctx = _audioCtx, now = ctx.currentTime;
       var osc  = ctx.createOscillator();
       var gain = ctx.createGain();
       osc.connect(gain); gain.connect(_dest());
       osc.type = 'sine';
       osc.frequency.value = note.freq;
-      /* Compensazione Fletcher-Munson: frequenze basse suonano più deboli */
       var gainVal = note.freq < 250 ? 0.92 : 0.55;
       gain.gain.setValueAtTime(0, now);
       gain.gain.linearRampToValueAtTime(gainVal, now + 0.025);
@@ -70,12 +64,9 @@ const NoteAccordi = (() => {
   function _toggleChord(chord, btn) {
     _initAudio();
     if (!_audioCtx) return;
-
     if (_chordState && _chordState.btn === btn) {
-      /* Stesso accordo → spegni */
       _stopChord();
     } else {
-      /* Nuovo accordo → cambia */
       _stopChord();
       _startChord(chord, btn);
     }
@@ -118,13 +109,13 @@ const NoteAccordi = (() => {
   function _setNoteActive(btn, active) {
     var sharp = btn.dataset.sharp === 'true';
     if (active) {
-      btn.style.boxShadow = '0 0 16px 8px rgba(255,255,255,0.45)';
-      btn.style.transform = 'scale(1.13)';
+      btn.style.boxShadow  = '0 0 16px 8px rgba(255,255,255,0.45)';
+      btn.style.transform  = 'scale(1.13)';
       btn.style.background = sharp ? 'rgba(90,90,150,0.98)' : 'rgba(255,255,255,1)';
       btn.style.borderColor = sharp ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.90)';
     } else {
-      btn.style.boxShadow = '';
-      btn.style.transform = '';
+      btn.style.boxShadow  = '';
+      btn.style.transform  = '';
       btn.style.background = sharp ? 'rgba(30,30,50,0.92)' : 'rgba(255,255,255,0.92)';
       btn.style.borderColor = sharp ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.55)';
     }
@@ -179,6 +170,12 @@ const NoteAccordi = (() => {
         { name:'La',   sharp:false, freq:440.00 },
         { name:'La♯',  sharp:true,  freq:466.16 },
         { name:'Si',   sharp:false, freq:493.88 },
+        { name:'Do',   sharp:false, freq:523.25 },
+        { name:'Do♯',  sharp:true,  freq:554.37 },
+        { name:'Re',   sharp:false, freq:587.33 },
+        { name:'Re♯',  sharp:true,  freq:622.25 },
+        { name:'Mi',   sharp:false, freq:659.25 },
+        { name:'Fa',   sharp:false, freq:698.46 },
       ]
     },
   ];
