@@ -305,6 +305,7 @@ class IngressiGame {
 
   _buildConfig() {
     var self = this;
+    this.container.innerHTML = '';
     this.container.style.cssText = '';   /* lascia .game-area flex centrato */
 
     var S = this._S();
@@ -440,6 +441,7 @@ class IngressiGame {
 
   _build() {
     var self = this;
+    this.container.innerHTML = '';
     this.container.style.cssText = '';
 
     var S = this._S();
