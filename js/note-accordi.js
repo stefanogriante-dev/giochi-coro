@@ -56,8 +56,10 @@ const NoteAccordi = (() => {
       osc.connect(gain); gain.connect(_dest());
       osc.type = 'sine';
       osc.frequency.value = note.freq;
+      /* Compensazione Fletcher-Munson: frequenze basse suonano più deboli */
+      var gainVal = note.freq < 250 ? 0.92 : 0.55;
       gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.55, now + 0.025);
+      gain.gain.linearRampToValueAtTime(gainVal, now + 0.025);
       osc.start(now);
       _noteStates[key] = { osc: osc, gain: gain };
       _setNoteActive(btn, true);
