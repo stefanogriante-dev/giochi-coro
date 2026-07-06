@@ -1,98 +1,149 @@
 /* ===========================
-   NOTE E ACCORDI
-   Schermata di riferimento: note singole + accordi
+   NOTE E ACCORDI  v2
+   - Note: toggle, più note simultanee
+   - Accordi: esclusivi, toggle
+   - Volume alto, suono continuo
    =========================== */
 
 const NoteAccordi = (() => {
 
-  let _audioCtx  = null;
-  let _activeOsc = [];
-  let _activeTimer = null;
+  let _audioCtx    = null;
+  let _compressor  = null;
+  let _noteStates  = {};   /* key=freq -> { osc, gain } */
+  let _chordState  = null; /* { oscs, gains, btn } */
 
+  /* ---- Audio init ---- */
   function _initAudio() {
     try {
-      if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (!_audioCtx) {
+        _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        _compressor = _audioCtx.createDynamicsCompressor();
+        _compressor.threshold.value = -18;
+        _compressor.knee.value      = 20;
+        _compressor.ratio.value     = 6;
+        _compressor.attack.value    = 0.003;
+        _compressor.release.value   = 0.15;
+        _compressor.connect(_audioCtx.destination);
+      }
       if (_audioCtx.state === 'suspended') _audioCtx.resume();
     } catch(e) {}
   }
 
-  function _stopActive() {
-    _activeOsc.forEach(function(o) { try { o.stop(0); } catch(e) {} });
-    _activeOsc = [];
-    if (_activeTimer) { clearTimeout(_activeTimer); _activeTimer = null; }
-  }
+  function _dest() { return _compressor || _audioCtx.destination; }
 
-  function _resetButtons() {
-    document.querySelectorAll('.na-btn').forEach(function(b) {
-      b.style.boxShadow = '';
-      b.style.transform = '';
-    });
-  }
+  /* ---- Nota singola: toggle, più note insieme ---- */
+  function _toggleNote(note, btn) {
+    _initAudio();
+    if (!_audioCtx) return;
 
-  function _highlight(btn) {
-    _resetButtons();
-    if (btn) {
-      btn.style.boxShadow = '0 0 18px 6px rgba(255,255,255,0.35)';
-      btn.style.transform = 'scale(1.10)';
+    var key = String(note.freq);
+
+    if (_noteStates[key]) {
+      /* Spegni */
+      var s = _noteStates[key];
+      var now = _audioCtx.currentTime;
+      s.gain.gain.cancelScheduledValues(now);
+      s.gain.gain.setValueAtTime(s.gain.gain.value, now);
+      s.gain.gain.linearRampToValueAtTime(0.0001, now + 0.3);
+      s.osc.stop(now + 0.35);
+      delete _noteStates[key];
+      _setNoteActive(btn, false);
+    } else {
+      /* Accendi */
+      var ctx = _audioCtx, now = ctx.currentTime;
+      var osc  = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain); gain.connect(_dest());
+      osc.type = 'sine';
+      osc.frequency.value = note.freq;
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.55, now + 0.025);
+      osc.start(now);
+      _noteStates[key] = { osc: osc, gain: gain };
+      _setNoteActive(btn, true);
     }
   }
 
-  function _playNote(freq, btn) {
+  /* ---- Accordo: esclusivo, toggle ---- */
+  function _toggleChord(chord, btn) {
     _initAudio();
     if (!_audioCtx) return;
-    _stopActive();
-    _highlight(btn);
 
-    var ctx = _audioCtx, now = ctx.currentTime;
-    var dur = 2.2, attack = 0.02, release = 0.55;
-
-    var osc  = ctx.createOscillator();
-    var gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.type = 'sine';
-    osc.frequency.value = freq;
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(0.28, now + attack);
-    gain.gain.setValueAtTime(0.28, now + dur - release);
-    gain.gain.linearRampToValueAtTime(0.0001, now + dur);
-    osc.start(now); osc.stop(now + dur + 0.05);
-    _activeOsc = [osc];
-
-    _activeTimer = setTimeout(function() {
-      _resetButtons(); _activeOsc = [];
-    }, dur * 1000);
+    if (_chordState && _chordState.btn === btn) {
+      /* Stesso accordo → spegni */
+      _stopChord();
+    } else {
+      /* Nuovo accordo → cambia */
+      _stopChord();
+      _startChord(chord, btn);
+    }
   }
 
-  function _playChord(notes, btn) {
-    _initAudio();
-    if (!_audioCtx) return;
-    _stopActive();
-    _highlight(btn);
+  function _stopChord() {
+    if (!_chordState) return;
+    var now = _audioCtx.currentTime;
+    var cs = _chordState;
+    cs.gains.forEach(function(g) {
+      g.gain.cancelScheduledValues(now);
+      g.gain.setValueAtTime(g.gain.value, now);
+      g.gain.linearRampToValueAtTime(0.0001, now + 0.45);
+    });
+    cs.oscs.forEach(function(o) { try { o.stop(now + 0.5); } catch(e){} });
+    _setChordActive(cs.btn, false);
+    _chordState = null;
+  }
 
+  function _startChord(chord, btn) {
     var ctx = _audioCtx, now = ctx.currentTime;
-    var dur = 5.0, attack = 0.25, release = 0.9;
-
-    notes.forEach(function(freq) {
+    var oscs = [], gains = [];
+    chord.notes.forEach(function(freq) {
       var osc  = ctx.createOscillator();
       var gain = ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
+      osc.connect(gain); gain.connect(_dest());
       osc.type = 'sine';
       osc.frequency.value = freq;
       gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.15, now + attack);
-      gain.gain.setValueAtTime(0.15, now + dur - release);
-      gain.gain.linearRampToValueAtTime(0.0001, now + dur);
-      osc.start(now); osc.stop(now + dur + 0.05);
-      _activeOsc.push(osc);
+      gain.gain.linearRampToValueAtTime(0.38, now + 0.28);
+      osc.start(now);
+      oscs.push(osc);
+      gains.push(gain);
     });
-
-    _activeTimer = setTimeout(function() {
-      _resetButtons(); _activeOsc = [];
-    }, dur * 1000);
+    _chordState = { oscs: oscs, gains: gains, btn: btn };
+    _setChordActive(btn, true);
   }
 
-  /* ---- costruzione UI ---- */
+  /* ---- Feedback visivo ---- */
+  function _setNoteActive(btn, active) {
+    var sharp = btn.dataset.sharp === 'true';
+    if (active) {
+      btn.style.boxShadow = '0 0 16px 8px rgba(255,255,255,0.45)';
+      btn.style.transform = 'scale(1.13)';
+      btn.style.background = sharp ? 'rgba(90,90,150,0.98)' : 'rgba(255,255,255,1)';
+      btn.style.borderColor = sharp ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.90)';
+    } else {
+      btn.style.boxShadow = '';
+      btn.style.transform = '';
+      btn.style.background = sharp ? 'rgba(30,30,50,0.92)' : 'rgba(255,255,255,0.92)';
+      btn.style.borderColor = sharp ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.55)';
+    }
+  }
 
+  function _setChordActive(btn, active) {
+    var isMaj = btn.dataset.type === 'maj';
+    if (active) {
+      btn.style.background  = isMaj ? 'rgba(251,191,36,0.42)' : 'rgba(139,92,246,0.42)';
+      btn.style.boxShadow   = isMaj ? '0 0 20px 8px rgba(251,191,36,0.55)' : '0 0 20px 8px rgba(139,92,246,0.55)';
+      btn.style.transform   = 'scale(1.10)';
+      btn.style.borderColor = isMaj ? 'rgba(251,191,36,0.90)' : 'rgba(139,92,246,0.90)';
+    } else {
+      btn.style.background  = isMaj ? 'rgba(251,191,36,0.10)' : 'rgba(139,92,246,0.10)';
+      btn.style.boxShadow   = '';
+      btn.style.transform   = '';
+      btn.style.borderColor = isMaj ? 'rgba(251,191,36,0.55)' : 'rgba(139,92,246,0.55)';
+    }
+  }
+
+  /* ---- Dati ---- */
   var OCTAVES = [
     {
       label: 'OTTAVA BASSA',
@@ -155,10 +206,12 @@ const NoteAccordi = (() => {
     { name:'Mib m', notes:[311.13,369.99,466.16,622.25] },
   ];
 
+  /* ---- Costruzione UI ---- */
   function _noteBtn(note) {
     var btn = document.createElement('button');
     btn.className = 'na-btn';
-    btn.innerHTML = note.name;
+    btn.textContent = note.name;
+    btn.dataset.sharp = String(note.sharp);
     var s = note.sharp;
     btn.style.cssText = [
       'padding:' + (s ? '6px 8px' : '10px 12px'),
@@ -171,35 +224,37 @@ const NoteAccordi = (() => {
       'font-weight:800',
       'cursor:pointer',
       'letter-spacing:0.3px',
-      'transition:all 0.10s',
+      'transition:background 0.12s,box-shadow 0.12s,transform 0.08s',
       'user-select:none',
       '-webkit-user-select:none',
       'white-space:nowrap',
       'outline:none',
       '-webkit-tap-highlight-color:transparent',
     ].join(';');
-    btn.addEventListener('click', (function(f, b) {
-      return function() { _playNote(f, b); };
-    })(note.freq, btn));
+    btn.addEventListener('click', (function(n, b) {
+      return function() { _toggleNote(n, b); };
+    })(note, btn));
     return btn;
   }
 
-  function _chordBtn(ch, color, border, bg) {
+  function _chordBtn(ch, type) {
+    var isMaj = type === 'maj';
     var btn = document.createElement('button');
     btn.className = 'na-btn';
     btn.textContent = ch.name;
+    btn.dataset.type = type;
     btn.style.cssText = [
       'padding:9px 22px',
       'border-radius:24px',
-      'border:2px solid ' + border,
-      'background:' + bg,
-      'color:' + color,
+      'border:2px solid ' + (isMaj ? 'rgba(251,191,36,0.55)' : 'rgba(139,92,246,0.55)'),
+      'background:' + (isMaj ? 'rgba(251,191,36,0.10)' : 'rgba(139,92,246,0.10)'),
+      'color:' + (isMaj ? '#fde68a' : '#c4b5fd'),
       'font-family:inherit',
       'font-size:clamp(0.78rem,1.6vw,0.95rem)',
       'font-weight:800',
       'cursor:pointer',
       'letter-spacing:0.5px',
-      'transition:all 0.12s',
+      'transition:background 0.12s,box-shadow 0.12s,transform 0.08s',
       'user-select:none',
       '-webkit-user-select:none',
       'white-space:nowrap',
@@ -207,14 +262,13 @@ const NoteAccordi = (() => {
       '-webkit-tap-highlight-color:transparent',
     ].join(';');
     btn.addEventListener('click', (function(c, b) {
-      return function() { _playChord(c.notes, b); };
+      return function() { _toggleChord(c, b); };
     })(ch, btn));
     return btn;
   }
 
   function _section(labelText) {
     var sec = document.createElement('div');
-
     var lbl = document.createElement('div');
     lbl.textContent = labelText;
     lbl.style.cssText = [
@@ -226,11 +280,9 @@ const NoteAccordi = (() => {
       'text-align:center',
     ].join(';');
     sec.appendChild(lbl);
-
     var row = document.createElement('div');
     row.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px 8px;justify-content:center;align-items:center;';
     sec.appendChild(row);
-
     sec._row = row;
     return sec;
   }
@@ -251,30 +303,22 @@ const NoteAccordi = (() => {
       'box-sizing:border-box',
     ].join(';');
 
-    /* Note per ottava */
     OCTAVES.forEach(function(oct) {
       var sec = _section(oct.label);
       oct.notes.forEach(function(n) { sec._row.appendChild(_noteBtn(n)); });
       wrap.appendChild(sec);
     });
 
-    /* Separatore */
     var hr = document.createElement('div');
     hr.style.cssText = 'border-top:1px solid rgba(255,255,255,0.10);';
     wrap.appendChild(hr);
 
-    /* Accordi maggiori */
     var majSec = _section('ACCORDI MAGGIORI');
-    CHORDS_MAJ.forEach(function(ch) {
-      majSec._row.appendChild(_chordBtn(ch, '#fde68a', 'rgba(251,191,36,0.55)', 'rgba(251,191,36,0.10)'));
-    });
+    CHORDS_MAJ.forEach(function(ch) { majSec._row.appendChild(_chordBtn(ch, 'maj')); });
     wrap.appendChild(majSec);
 
-    /* Accordi minori */
     var minSec = _section('ACCORDI MINORI');
-    CHORDS_MIN.forEach(function(ch) {
-      minSec._row.appendChild(_chordBtn(ch, '#c4b5fd', 'rgba(139,92,246,0.55)', 'rgba(139,92,246,0.10)'));
-    });
+    CHORDS_MIN.forEach(function(ch) { minSec._row.appendChild(_chordBtn(ch, 'min')); });
     wrap.appendChild(minSec);
 
     target.appendChild(wrap);
