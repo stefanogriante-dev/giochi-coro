@@ -19,6 +19,9 @@ var I18n = (function () {
       card_metro_title:    'Metronomo',
       card_metro_desc:     'Segna il tempo con click acustico e segnale visivo, BPM regolabile',
       card_metro_badge:    'Utilità',
+      card_note_title:     'Note e Accordi',
+      card_note_desc:      'Ascolta note e accordi per intonare e trovare la voce',
+      card_note_badge:     'Intonazione',
       /* --- Selezione modalità --- */
       mode_title:          'Come vuoi esercitarti?',
       mode_singoli:        'Singoli',
@@ -56,6 +59,7 @@ var I18n = (function () {
       btn_start:           '▶ Inizia',
       btn_pause:           '⏸ Pausa',
       btn_resume:          '▶ Riprendi',
+      btn_restart:         '⟲ Ricomincia',
       btn_reset:           '↺ Reset',
       /* --- Metronomo --- */
       metro_title:         'Metronomo',
@@ -116,6 +120,9 @@ var I18n = (function () {
       card_metro_title:    'Metronome',
       card_metro_desc:     'Keep time with acoustic click and visual signal, adjustable BPM',
       card_metro_badge:    'Utility',
+      card_note_title:     'Notes and Chords',
+      card_note_desc:      'Listen to notes and chords to tune your pitch and find your part',
+      card_note_badge:     'Pitch',
       /* --- Mode selection --- */
       mode_title:          'How do you want to practice?',
       mode_singoli:        'Solo',
@@ -153,6 +160,7 @@ var I18n = (function () {
       btn_start:           '▶ Start',
       btn_pause:           '⏸ Pause',
       btn_resume:          '▶ Resume',
+      btn_restart:         '⟲ Restart',
       btn_reset:           '↺ Reset',
       /* --- Metronome --- */
       metro_title:         'Metronome',

@@ -105,9 +105,9 @@
             <circle cx="58" cy="40" r="4" fill="#1abc9c" opacity="0.85"/>
           </svg>
         </span>
-        <div class="card-title">Note e Accordi</div>
-        <div class="card-desc">Ascolta note e accordi per intonare e trovare la voce</div>
-        <span class="badge" style="background:#1abc9c">Intonazione</span>
+        <div class="card-title" data-i18n="card_note_title">Note e Accordi</div>
+        <div class="card-desc" data-i18n="card_note_desc">Ascolta note e accordi per intonare e trovare la voce</div>
+        <span class="badge" style="background:#1abc9c" data-i18n="card_note_badge">Intonazione</span>
       </div>
 
       <div class="card" style="--card-color: #3498db" onclick="App.goTo('metronomo')">
@@ -366,6 +366,7 @@
 
         <div class="game-controls">
           <button class="btn-game" id="btn-start-stop" onclick="App.toggleGame()" data-i18n="btn_start">▶ Inizia</button>
+          <button class="btn-game" id="btn-restart-game" style="display:none;" onclick="App.restartGame()" data-i18n="btn_restart">⟲ Ricomincia</button>
           <button class="btn-game" onclick="App.resetGame()" data-i18n="btn_reset">↺ Reset</button>
           <button class="btn-game btn-fullscreen" id="btn-fullscreen" onclick="App.toggleFullscreen()" title="Schermo intero">⛶</button>
         </div>

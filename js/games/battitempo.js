@@ -229,6 +229,20 @@ class BattiTempoGame {
     this._startBeat = 0;
   }
 
+  /* Ricomincia la sessione corrente da capo, mantenendo le stesse note */
+  restart() {
+    this._playing = false;
+    if (this._rafId)  { cancelAnimationFrame(this._rafId); this._rafId = null; }
+    if (this._cdTimer) { clearTimeout(this._cdTimer); this._cdTimer = null; }
+    this._wallStart = 0;
+    this._startBeat = 0;
+    var btns = document.getElementById('bt-btns');
+    if (btns) btns.style.display = 'none';
+    var st = document.getElementById('bt-status');
+    if (st) st.textContent = I18n.t('press_start');
+    this._drawPreview();
+  }
+
   updateBpm(bpm) {
     if (this._playing && this._wallStart) {
       var bps_old = this.bpm / 60;

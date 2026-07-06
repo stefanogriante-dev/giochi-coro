@@ -157,6 +157,12 @@ const App = (() => {
       case 'ingressi':   currentGameObj = new IngressiGame(area, gameState);   break;
     }
 
+    const restartBtn = document.getElementById('btn-restart-game');
+    if (restartBtn) {
+      restartBtn.style.display =
+        (currentGameObj && typeof currentGameObj.restart === 'function') ? '' : 'none';
+    }
+
     syncBpmDot();
   }
 
@@ -172,6 +178,18 @@ const App = (() => {
       state.running = true;
       document.getElementById('btn-start-stop').textContent = I18n.t('btn_pause');
       syncBpmDot();
+    }
+  }
+
+  function restartGame() {
+    /* Ricomincia la sessione corrente da capo senza cambiare le note/contenuto */
+    if (currentGameObj && typeof currentGameObj.restart === 'function') {
+      currentGameObj.restart();
+      state.running = false;
+      document.getElementById('btn-start-stop').textContent = I18n.t('btn_start');
+      clearBpmDot();
+    } else {
+      resetGame();
     }
   }
 
@@ -263,7 +281,7 @@ const App = (() => {
   return {
     goTo, setMode, selectGame, startGame, exitGame,
     setBpm, changeBpm,
-    toggleGame, resetGame, toggleFullscreen,
+    toggleGame, resetGame, restartGame, toggleFullscreen,
     showMessage, closeMessage,
     randArray, shuffle,
     get bpm()     { return state.bpm; },

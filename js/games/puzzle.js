@@ -225,6 +225,19 @@ class PuzzleGame {
 
   updateBpm(bpm) { this.bpm = bpm; }
 
+  /* Ricomincia la sessione corrente da capo, mantenendo lo stesso pattern */
+  restart() {
+    this._playing = false;
+    this._clearTimers();
+    this._clearHighlights();
+    var cdEl = document.getElementById('puzzle-countdown');
+    if (cdEl) { cdEl.textContent = ''; cdEl.style.display = 'none'; }
+    this._beat       = 0;
+    this._subbeat    = 0;
+    this._loopCounts = [0, 0, 0, 0];
+    this._finished   = false;
+  }
+
   _tick() {
     if (!this._playing) return;
     var self = this;
